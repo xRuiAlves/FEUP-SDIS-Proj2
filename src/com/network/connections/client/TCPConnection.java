@@ -9,30 +9,31 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Future;
-
+import com.network.Node;
 public class TCPConnection extends Connection {
 
     private final InetAddress ip;
     private final Socket socket;
-    private final ObjectInputStream inputStream;
-    private final ObjectOutputStream outputStream;
+    private  ObjectInputStream inputStream;
+    private ObjectOutputStream outputStream;
     private Integer port;
-    private Future future;
 
-    public TCPConnection(InetAddress ip, Integer port) throws IOException {
+    public TCPConnection(Node node, InetAddress ip, Integer port) throws IOException {
+        super(node);
         this.ip = ip;
         this.port = port;
         this.socket = new Socket(ip, port);
-        this.inputStream = new ObjectInputStream(this.socket.getInputStream());
         this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
+        this.inputStream = new ObjectInputStream(this.socket.getInputStream());
     }
 
-    public TCPConnection(Socket socket) throws IOException {
+    public TCPConnection(Node node, Socket socket) throws IOException {
+        super(node);
         this.ip = socket.getInetAddress();
         this.port = socket.getPort();
         this.socket = socket;
-        this.inputStream = new ObjectInputStream(this.socket.getInputStream());
         this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
+        this.inputStream = new ObjectInputStream(this.socket.getInputStream());
     }
 
     @Override
@@ -63,5 +64,10 @@ public class TCPConnection extends Connection {
     @Override
     public void start() {
         this.future = ThreadPool.getInstance().submit(this);
+    }
+
+    @Override
+    public boolean isClosed() {
+        return this.socket.isClosed();
     }
 }

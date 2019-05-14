@@ -22,7 +22,7 @@ public class JoinHandler implements SubscriptionHandlerInterface {
         if (msg instanceof LookUpAnsMessage) {
             TCPConnection connection = null;
             try {
-                connection = new TCPConnection(msg.getHostname(), msg.getPort());
+                connection = new TCPConnection(node, msg.getHostname(), msg.getPort());
             } catch (IOException e) {
                 NetworkLogger.printLog(Level.SEVERE, "Failed connection to successor");
                 System.exit(-2);

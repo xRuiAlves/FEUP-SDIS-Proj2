@@ -21,6 +21,7 @@ public class SendMessage implements Runnable{
     public void run() {
         try {
             this.connection.sendMessage(message);
+            NetworkLogger.printLog(Level.INFO, "Message sent");
         } catch (IOException e) {
             NetworkLogger.printLog(Level.WARNING, "Failure in sending " + message.getClass() + " - " + e.getMessage());
         }

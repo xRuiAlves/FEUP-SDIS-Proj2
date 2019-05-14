@@ -18,4 +18,6 @@ public interface ConnectionInterface extends Runnable {
     Integer getPort();
 
     void start();
+
+    boolean isClosed();
 }

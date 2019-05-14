@@ -3,10 +3,11 @@ package com.network.messages;
 
 import com.network.Node;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.net.InetAddress;
 
-public abstract class Message {
+public abstract class Message implements Serializable {
     protected BigInteger senderId;
     protected InetAddress hostname;
     protected Integer port;

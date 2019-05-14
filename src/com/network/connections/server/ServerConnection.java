@@ -3,18 +3,20 @@ package com.network.connections.server;
 import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.TCPConnection;
 import com.network.utils.IpFinder;
+import com.network.Node;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.UnknownHostException;
 
 public class ServerConnection implements ServerConnectionInterface {
 
     private final ServerSocket serverSocket;
     private InetAddress ip;
+    private Node node;
 
-    public ServerConnection() throws IOException {
+    public ServerConnection(Node node) throws IOException {
+        this.node = node;
         this.serverSocket = new ServerSocket(0);
         this.ip = IpFinder.findIp();
     }
@@ -31,6 +33,6 @@ public class ServerConnection implements ServerConnectionInterface {
 
     @Override
     public ConnectionInterface accept() throws IOException {
-        return new TCPConnection(this.serverSocket.accept());
+        return new TCPConnection(node, this.serverSocket.accept());
     }
 }
