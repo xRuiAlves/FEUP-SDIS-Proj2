@@ -25,8 +25,8 @@ public class LookUpOperation implements Runnable {
             BigInteger lookup_id = message.getId();
             if (lookup_id.equals(node.getId())
                     || (node.getPredecessor() != null
-                        && (node.getPredecessor().getAccess().compareTo(lookup_id) < 0 && node.getId().compareTo(lookup_id) >= 0))
-                    || (node.getSuccessor() == null)
+                        && (this.inNode(lookup_id, node.getPredecessor().getId(), node.getId())))
+                    || (node.getSuccessor().getId().equals(node.getId()))
             ) {
                 ConnectionInterface connection = new TCPConnection(node, message.getHostname(), message.getPort());
                 connection.sendMessage(new LookUpAnsMessage(this.node, message.getId()));
@@ -39,7 +39,18 @@ public class LookUpOperation implements Runnable {
 
         } catch (Exception e) {
             NetworkLogger.printLog(Level.WARNING, "Error in lookup operation - " + e.getMessage());
+            if (this.node.getSuccessor() == null) {
+                System.exit(-3);
+            }
         }
+    }
 
+
+    private boolean inNode(BigInteger id, BigInteger lower, BigInteger upper) {
+        if (lower.compareTo(upper) > 0) {
+            return (id.compareTo(lower) > 0 || id.compareTo(upper) <= 0);
+        } else {
+            return id.compareTo(lower) > 0 && id.compareTo(upper) <= 0;
+        }
     }
 }

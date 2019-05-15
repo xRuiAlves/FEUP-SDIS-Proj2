@@ -2,9 +2,13 @@ package com.network.threads.operations;
 
 
 import com.network.ChordNode;
+import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
+import com.network.info.NullInfo;
 import com.network.log.NetworkLogger;
 import com.network.messages.GetPredecessor;
+import com.network.messages.Predecessor;
+import com.network.threads.ThreadPool;
 
 import java.util.logging.Level;
 
@@ -19,11 +23,25 @@ public class StabilizeOperation implements Runnable{
     @Override
     public void run() {
         try {
-            NodeInfo successor = node.getSuccessor();
-            if (successor != null) {
-                successor.getConnection().sendMessage(new GetPredecessor(this.node));
-                NetworkLogger.printLog(Level.INFO, "Starting stabilization algorithm");
+            if (this.node.getSuccessor() == null) {
+                NetworkLogger.printLog(Level.INFO, "Stabilize not possible");
+                return;
             }
+
+            if (this.node.getId().equals(this.node.getSuccessor().getId())) {
+                InfoInterface predecessor = this.node.getPredecessor();
+                if (predecessor instanceof NullInfo) {
+                    NetworkLogger.printLog(Level.INFO, "Stabilize not possible");
+                    return;
+                }
+
+                this.node.setSuccessor((NodeInfo) predecessor);
+
+            } else {
+                NodeInfo successor = node.getSuccessor();
+                ThreadPool.getInstance().submit(new SendMessage(new GetPredecessor(this.node), successor.getConnection()));
+            }
+
         } catch (Exception e) {
             NetworkLogger.printLog(Level.WARNING, "Error asking its successor for its predecessor");
         }

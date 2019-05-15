@@ -10,7 +10,7 @@ public class Predecessor extends Message{
 
     public Predecessor(ChordNode node) throws UnknownHostException {
         super(node.getId(), node.getPredecessor().getIp(), node.getPredecessor().getPort());
-        this.id = node.getPredecessor().getAccess();
+        this.id = node.getPredecessor().getId();
     }
 
     public BigInteger getId() {

@@ -1,6 +1,7 @@
 package com.network;
 
 import com.network.connections.ConnectionHandler;
+import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.TCPConnection;
 import com.network.connections.server.Server;
 import com.network.info.InfoInterface;
@@ -9,6 +10,7 @@ import com.network.info.NullInfo;
 import com.network.log.NetworkLogger;
 import com.network.messages.LookUpMessage;
 import com.network.messages.Message;
+import com.network.messages.Notify;
 import com.network.subscriptions.JoinHandler;
 import com.network.threads.ThreadPool;
 import com.network.threads.operations.LookUpOperation;
@@ -59,9 +61,10 @@ public class ChordNode {
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
-        ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 200, TimeUnit.MILLISECONDS);
         this.predecessor = new NullInfo();
-        NetworkLogger.printLog(Level.WARNING, "Initiate successor of the first node as itself");
+        this.successor = new NodeInfo(this, this.id, this.server.getServerConnection().getIp(), this.server.getServerConnection().getPort());
+        ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 1000, TimeUnit.MILLISECONDS);
+
         NetworkLogger.setNodeId(this.id.toString());
         NetworkLogger.printLog(Level.INFO, "Server connection open: " + server.getServerConnection().getIp().toString() + ":" + server.getServerConnection().getPort());
         NetworkLogger.printLog(Level.INFO, "New chord network started");
@@ -71,8 +74,8 @@ public class ChordNode {
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
-        ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 200, TimeUnit.MILLISECONDS);
         this.predecessor = new NullInfo();
+        ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 1000, TimeUnit.MILLISECONDS);
 
         NetworkLogger.setNodeId(this.id.toString());
         NetworkLogger.printLog(Level.INFO, "Server connection open: " + server.getServerConnection().getIp().toString() + ":" + server.getServerConnection().getPort());
@@ -80,7 +83,13 @@ public class ChordNode {
     }
 
     private void join(InetAddress host, Integer port) throws IOException {
-        TCPConnection connection  = new TCPConnection(this, host, port);
+        TCPConnection connection = null;
+        try {
+            connection = new TCPConnection(this, host, port);
+        } catch (Exception e) {
+            NetworkLogger.printLog(Level.SEVERE, "Cannot find network");
+            System.exit(-4);
+        }
         NetworkLogger.printLog(Level.INFO, "Connection established");
         Message lookUpMessage = new LookUpMessage(this, this.id);
         ConnectionHandler.getInstance().subscribeLookUp(this.id, new JoinHandler(this));
@@ -100,8 +109,20 @@ public class ChordNode {
     }
 
     public void setSuccessor(NodeInfo node) {
-        this.successor = node;
-        NetworkLogger.printLog(Level.INFO, "Successor updated - " + node);
+        if (this.successor == null || this.id.equals(this.successor.getId()) || node.inInterval(this.id, this.successor.getId())) {
+            try {
+                node.startConnection();
+                this.successor = node;
+                NetworkLogger.printLog(Level.INFO, "Changed successor - " + this.successor);
+            } catch (IOException e) {
+                NetworkLogger.printLog(Level.WARNING, "Failed connection to successor");
+            }
+        }
+        if (this.successor != null) {
+            ConnectionInterface connection = this.successor.getConnection();
+            if (connection != null)
+                ThreadPool.getInstance().submit(new SendMessage(new Notify(this, this.id), connection));
+        }
     }
 
     public NodeInfo getSuccessor() {
@@ -112,9 +133,10 @@ public class ChordNode {
         return predecessor;
     }
 
-    public void setPredecessor(InfoInterface predecessor) {
-        this.predecessor = predecessor;
-        NetworkLogger.printLog(Level.INFO, "Predecessor updated - " + predecessor);
-
+    public void setPredecessor(NodeInfo predecessor) {
+        if (this.predecessor instanceof NullInfo  || (predecessor.inInterval(this.predecessor.getId(), this.id))) {
+            this.predecessor = predecessor;
+            NetworkLogger.printLog(Level.INFO, "Predecessor updated - " + predecessor);
+        }
     }
 }
