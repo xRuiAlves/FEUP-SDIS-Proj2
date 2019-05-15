@@ -1,9 +1,9 @@
 package com.network.connections.server;
 
+import com.network.ChordNode;
 import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.TCPConnection;
 import com.network.utils.IpFinder;
-import com.network.Node;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -13,9 +13,9 @@ public class ServerConnection implements ServerConnectionInterface {
 
     private final ServerSocket serverSocket;
     private InetAddress ip;
-    private Node node;
+    private ChordNode node;
 
-    public ServerConnection(Node node) throws IOException {
+    public ServerConnection(ChordNode node) throws IOException {
         this.node = node;
         this.serverSocket = new ServerSocket(0);
         this.ip = IpFinder.findIp();

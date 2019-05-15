@@ -1,7 +1,7 @@
 package com.network.messages;
 
 
-import com.network.Node;
+import com.network.ChordNode;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -19,7 +19,7 @@ public abstract class Message implements Serializable {
         this.port = port;
     }
 
-    Message(Node node) {
+    Message(ChordNode node) {
         this.senderId = node.getId();
         this.hostname = node.getServer().getServerConnection().getIp();
         this.port = node.getServer().getServerConnection().getPort();

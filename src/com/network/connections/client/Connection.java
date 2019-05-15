@@ -1,19 +1,18 @@
 package com.network.connections.client;
 
+import com.network.ChordNode;
 import com.network.connections.ConnectionHandler;
+import com.network.info.NodeInfo;
 import com.network.log.NetworkLogger;
-import com.network.messages.LookUpAnsMessage;
-import com.network.messages.LookUpMessage;
-import com.network.messages.Message;
-import com.network.Node;
+import com.network.messages.*;
 
 import java.util.logging.Level;
 
 public abstract class Connection implements ConnectionInterface{
 
-    private Node node;
+    private ChordNode node;
 
-    public Connection(Node node) {
+    protected Connection(ChordNode node) {
 
         this.node = node;
     }
@@ -22,22 +21,32 @@ public abstract class Connection implements ConnectionInterface{
         while(true) {
             try {
                 Message message = this.getMessage();
-
                 if (message instanceof LookUpAnsMessage) {
                     ConnectionHandler.getInstance().notify((LookUpAnsMessage) message);
                     this.close();
                     return;
                 } else if (message instanceof LookUpMessage) {
                     this.node.lookup((LookUpMessage) message);
-                } else {
+                } else if(message instanceof GetPredecessor) {
+                    // The same socket is live until the node that asks closes it
+                    this.sendMessage(new Predecessor(this.node));
+                    NetworkLogger.printLog(Level.INFO, "Predecessor sent");
+                } else if (message instanceof Predecessor) {
+                    NetworkLogger.printLog(Level.WARNING, "Change predecessor - " + ((Predecessor) message).getId());
+                    this.node.setPredecessor(new NodeInfo(((Predecessor) message).getId(), message.getHostname(), message.getPort()));
+                }
+                else {
                     NetworkLogger.printLog(Level.SEVERE,"Implement receive precedent request and precedent response");
                 }
 
             } catch (Exception e) {
-                NetworkLogger.printLog(Level.WARNING, "Error receiving message - " + e.getMessage());
                 if (this.isClosed()) {
+                    NetworkLogger.printLog(Level.INFO, "Connection closed");
                     return;
                 }
+                NetworkLogger.printLog(Level.WARNING, "Error receiving message - " + e.getMessage());
+                e.printStackTrace();
+                return;
             }
         }
     }

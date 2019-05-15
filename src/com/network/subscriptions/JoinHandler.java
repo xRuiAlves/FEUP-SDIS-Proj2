@@ -1,20 +1,20 @@
 package com.network.subscriptions;
 
-import com.network.NodeInfo;
+import com.network.info.NodeInfo;
 import com.network.connections.client.TCPConnection;
 import com.network.log.NetworkLogger;
 import com.network.messages.LookUpAnsMessage;
 import com.network.messages.Message;
-import com.network.Node;
+import com.network.ChordNode;
 
 import java.io.IOException;
 import java.util.logging.Level;
 
 public class JoinHandler implements SubscriptionHandlerInterface {
 
-    private Node node;
+    private ChordNode node;
 
-    public JoinHandler(Node node) {
+    public JoinHandler(ChordNode node) {
         this.node = node;
     }
     @Override
@@ -23,13 +23,18 @@ public class JoinHandler implements SubscriptionHandlerInterface {
             TCPConnection connection = null;
             try {
                 connection = new TCPConnection(node, msg.getHostname(), msg.getPort());
+                connection.start();
             } catch (IOException e) {
                 NetworkLogger.printLog(Level.SEVERE, "Failed connection to successor");
                 System.exit(-2);
             }
 
-            node.setSuccessor(new NodeInfo(((LookUpAnsMessage) msg).getId(), msg.getSenderId(), connection));
-            NetworkLogger.printLog(Level.WARNING, "Implement - send update predecessor");
+            node.setSuccessor(new NodeInfo(msg.getSenderId(), connection));
         }
+    }
+
+    @Override
+    public boolean isPermanent() {
+        return false;
     }
 }

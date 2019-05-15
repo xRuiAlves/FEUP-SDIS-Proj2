@@ -1,13 +1,13 @@
 package com.network.messages;
 
-import com.network.Node;
+import com.network.ChordNode;
 
 import java.math.BigInteger;
 
 public class LookUpMessage extends Message {
     private BigInteger id;
 
-    public LookUpMessage(Node node, BigInteger id){
+    public LookUpMessage(ChordNode node, BigInteger id){
         super(node);
         this.id = id;
     }

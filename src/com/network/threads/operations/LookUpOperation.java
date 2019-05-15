@@ -1,17 +1,20 @@
 package com.network.threads.operations;
 
-import com.network.Node;
+import com.network.ChordNode;
+import com.network.connections.client.ConnectionInterface;
+import com.network.connections.client.TCPConnection;
 import com.network.log.NetworkLogger;
+import com.network.messages.LookUpAnsMessage;
 import com.network.messages.LookUpMessage;
 
 import java.math.BigInteger;
 import java.util.logging.Level;
 
 public class LookUpOperation implements Runnable {
-    private final Node node;
+    private final ChordNode node;
     private LookUpMessage message;
 
-    public LookUpOperation(Node node, LookUpMessage message) {
+    public LookUpOperation(ChordNode node, LookUpMessage message) {
         this.node = node;
         this.message = message;
     }
@@ -25,7 +28,9 @@ public class LookUpOperation implements Runnable {
                         && (node.getPredecessor().getAccess().compareTo(lookup_id) < 0 && node.getId().compareTo(lookup_id) >= 0))
                     || (node.getSuccessor() == null)
             ) {
-                NetworkLogger.printLog(Level.SEVERE, "Implement look up reply");
+                ConnectionInterface connection = new TCPConnection(node, message.getHostname(), message.getPort());
+                connection.sendMessage(new LookUpAnsMessage(this.node, message.getId()));
+                NetworkLogger.printLog(Level.INFO, "Lookup " + message.getId() + " sent to " + message.getHostname() + ":" + message.getPort());
                 return;
             }
 

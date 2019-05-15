@@ -1,6 +1,6 @@
 package com.network.utils;
 
-import com.network.Node;
+import com.network.ChordNode;
 import com.network.log.NetworkLogger;
 
 import java.math.BigInteger;
@@ -16,7 +16,7 @@ public class IdEncoder {
     private final BigInteger m;
 
     private IdEncoder() {
-        this.m = new BigInteger("2").pow(Node.m);
+        this.m = new BigInteger("2").pow(ChordNode.m);
     }
 
     public static BigInteger encode(String text) {

@@ -4,6 +4,7 @@ import com.network.messages.LookUpAnsMessage;
 import com.network.subscriptions.SubscriptionHandlerInterface;
 
 import java.math.BigInteger;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -34,9 +35,12 @@ public class ConnectionHandler implements ConnectionHandlerInterface {
 
     @Override
     public void notify(LookUpAnsMessage message) {
-        ConcurrentLinkedDeque<SubscriptionHandlerInterface> deque = this.lookUps.remove(message.getId());
-        for (SubscriptionHandlerInterface handler : deque) {
-            handler.notify(message);
+        if (this.lookUps.containsKey(message.getId())) {
+            ConcurrentLinkedDeque<SubscriptionHandlerInterface> deque = this.lookUps.get(message.getId());
+            Iterator iter = deque.iterator();
+            while (iter.hasNext()) {
+                ((SubscriptionHandlerInterface) iter.next()).notify(message);
+            }
         }
     }
 

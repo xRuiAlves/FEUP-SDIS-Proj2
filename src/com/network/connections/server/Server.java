@@ -3,7 +3,7 @@ package com.network.connections.server;
 import com.network.connections.client.ConnectionInterface;
 import com.network.log.NetworkLogger;
 import com.network.threads.ThreadPool;
-import com.network.Node;
+import com.network.ChordNode;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -12,7 +12,7 @@ public class Server implements Runnable{
 
     private final ServerConnectionInterface serverConnection;
 
-    public Server(Node node) throws IOException {
+    public Server(ChordNode node) throws IOException {
         this.serverConnection = new ServerConnection(node);
     }
 
