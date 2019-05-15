@@ -28,13 +28,27 @@ public class FingerTableUpdate implements SubscriptionHandlerInterface {
 
                 if(finger instanceof NullInfo || !finger.getId().equals(msg.getSenderId())) {
                     NetworkLogger.printLog(Level.INFO, "Updated finger table - " + id + " " + msg.getSenderId());
-                    NodeInfo newConnection = new NodeInfo(this.node, msg.getSenderId(), msg.getHostname(), msg.getPort());
-                    newConnection.startConnection();
-                    node.getFingerTable().put(id, newConnection);
 
                     if (finger instanceof NodeInfo) {
-                        ((NodeInfo) finger).getConnection().close();
+                        BigInteger fingerId = finger.getId();
+                        if (this.node.getManager().contains(fingerId)) {
+                            this.node.getManager().decreaseInterface(fingerId);
+                        }
                     }
+
+                    if (this.node.getManager().contains(msg.getSenderId())) {
+                        NodeInfo newConnection = new NodeInfo(this.node, msg.getSenderId(), this.node.getManager().get(msg.getSenderId()));
+                        node.getFingerTable().put(id, newConnection);
+
+                    } else {
+                        NodeInfo newConnection = new NodeInfo(this.node, msg.getSenderId(), msg.getHostname(), msg.getPort());
+                        newConnection.startConnection();
+                        node.getFingerTable().put(id, newConnection);
+                        node.getManager().put(msg.getSenderId(), newConnection.getConnection());
+                    }
+
+                } else {
+                    NetworkLogger.printLog(Level.INFO, "No change to finger table - " + id + " " + msg.getSenderId());
                 }
             } catch (Exception e) {
                 NetworkLogger.printLog(Level.WARNING, "Failure connecting to finger - " + e.getMessage());

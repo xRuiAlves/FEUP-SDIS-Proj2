@@ -21,7 +21,6 @@ public class Server implements Runnable{
         while (true) {
             try {
                 ConnectionInterface  connection = this.serverConnection.accept();
-                NetworkLogger.printLog(Level.INFO, "New connection accepted");
                 ThreadPool.getInstance().submit(connection);
             } catch (IOException e) {
                 NetworkLogger.printLog(Level.WARNING, "Error accepting connection - " + e.getMessage());

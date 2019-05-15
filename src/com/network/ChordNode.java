@@ -3,6 +3,7 @@ package com.network;
 import com.network.connections.ConnectionHandler;
 import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.TCPConnection;
+import com.network.connections.manager.ConnectionManager;
 import com.network.connections.server.Server;
 import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
@@ -36,6 +37,7 @@ public class ChordNode {
     private InfoInterface predecessor;
     private NodeInfo successor;
     private ConcurrentHashMap<BigInteger, InfoInterface> fingerTable;
+    private ConnectionManager manager;
 
     public static void main(String[] args) throws IOException {
         if (args.length < 1) {
@@ -63,6 +65,7 @@ public class ChordNode {
     }
 
     private ChordNode() throws IOException {
+        this.manager = new ConnectionManager();
         this.fingerTable = new ConcurrentHashMap<>();
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
@@ -79,6 +82,7 @@ public class ChordNode {
     }
 
     private ChordNode(InetAddress host, Integer port) throws IOException {
+        this.manager = new ConnectionManager();
         this.fingerTable = new ConcurrentHashMap<>();
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
@@ -165,5 +169,9 @@ public class ChordNode {
 
     public ConcurrentHashMap<BigInteger, InfoInterface> getFingerTable() {
         return fingerTable;
+    }
+
+    public ConnectionManager getManager() {
+        return manager;
     }
 }

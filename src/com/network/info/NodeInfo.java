@@ -15,18 +15,18 @@ public class NodeInfo implements Comparable, InfoInterface {
     private InetAddress ip;
     private Integer port;
 
-    public NodeInfo(ChordNode node, BigInteger access, ConnectionInterface connection) {
+    public NodeInfo(ChordNode node, BigInteger id, ConnectionInterface connection) {
         this.node = node;
-        this.id = access;
+        this.id = id;
         this.connection = connection;
         ip = this.connection.getIp();
         port = this.connection.getPort();
 
     }
 
-    public NodeInfo(ChordNode node, BigInteger access, InetAddress ip, Integer port) {
+    public NodeInfo(ChordNode node, BigInteger id, InetAddress ip, Integer port) {
         this.node = node;
-        this.id = access;
+        this.id = id;
         this.ip = ip;
         this.port = port;
     }

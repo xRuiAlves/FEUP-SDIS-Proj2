@@ -25,15 +25,20 @@ public class UpdateFingers implements Runnable {
 
     @Override
     public void run() {
-        NetworkLogger.printLog(Level.WARNING, "Try to update fingers");
-        if (node.getSuccessor() != null && !node.getSuccessor().getId().equals(node.getId())) {
-            BigInteger fingerId = (this.node.getId().add(two.pow(next))).mod(two.pow(m));
+        try {
+            if (node.getSuccessor() != null && !node.getSuccessor().getId().equals(node.getId())) {
+                BigInteger fingerId = (this.node.getId().add(two.pow(next))).mod(two.pow(m));
 
-            ThreadPool.getInstance().submit(new LookUpOperation(node, new LookUpMessage(node, fingerId)));
-            this.next += 1;
-            if (this.next > m) {
-                this.next = 1;
+                ThreadPool.getInstance().submit(new LookUpOperation(node, new LookUpMessage(node, fingerId)));
+                this.next += 1;
+                if (this.next > m) {
+                    this.next = 1;
+                }
             }
+
+        } catch (Exception e) {
+            NetworkLogger.printLog(Level.WARNING, "Error asking for finger table upgrade - " + e.getMessage());
+            e.printStackTrace();
         }
 
     }

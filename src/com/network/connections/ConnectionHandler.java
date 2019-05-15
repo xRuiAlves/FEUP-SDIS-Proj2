@@ -1,5 +1,6 @@
 package com.network.connections;
 
+import com.network.log.NetworkLogger;
 import com.network.messages.LookUpAnsMessage;
 import com.network.subscriptions.SubscriptionHandlerInterface;
 
@@ -7,6 +8,7 @@ import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.logging.Level;
 
 public class ConnectionHandler implements ConnectionHandlerInterface {
 
@@ -37,9 +39,16 @@ public class ConnectionHandler implements ConnectionHandlerInterface {
     public void notify(LookUpAnsMessage message) {
         if (this.lookUps.containsKey(message.getId())) {
             ConcurrentLinkedDeque<SubscriptionHandlerInterface> deque = this.lookUps.get(message.getId());
+            if (deque.size() == 0) {
+                NetworkLogger.printLog(Level.SEVERE, "No handlers for lookup " + message.getId());
+            }
             Iterator iter = deque.iterator();
             while (iter.hasNext()) {
-                ((SubscriptionHandlerInterface) iter.next()).notify(message);
+                SubscriptionHandlerInterface next = (SubscriptionHandlerInterface) iter.next();
+                next.notify(message);
+                if (!next.isPermanent()) {
+                    iter.remove();
+                }
             }
         }
     }

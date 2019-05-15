@@ -25,16 +25,15 @@ public class LookUpOperation implements Runnable {
 
     public void run() {
         try {
-            NetworkLogger.printLog(Level.INFO, "Starting lookup");
             BigInteger lookup_id = message.getId();
             if (lookup_id.equals(node.getId())
                     || (node.getPredecessor() != null
-                        && (this.inNode(lookup_id, node.getPredecessor().getId(), node.getId())))
+                    && (this.inNode(lookup_id, node.getPredecessor().getId(), node.getId())))
                     || (node.getSuccessor().getId().equals(node.getId()))
             ) {
                 ConnectionInterface connection = new TCPConnection(node, message.getHostname(), message.getPort());
                 connection.sendMessage(new LookUpAnsMessage(this.node, message.getId()));
-                NetworkLogger.printLog(Level.INFO, "Lookup " + message.getId() + " sent to " + message.getHostname() + ":" + message.getPort());
+//                NetworkLogger.printLog(Level.INFO, "Lookup " + message.getId() + " sent to " + message.getHostname() + ":" + message.getPort());
                 return;
             }
 
@@ -56,8 +55,8 @@ public class LookUpOperation implements Runnable {
         if (n.equals(next.getId()) || this.inNode(lookup_id, n, next.getId())) {
             return next;
         }
-        for (Map.Entry<BigInteger, InfoInterface> entry : this.node.getFingerTable().entrySet() ){
-            if(entry.getValue() instanceof NullInfo) {
+        for (Map.Entry<BigInteger, InfoInterface> entry : this.node.getFingerTable().entrySet()) {
+            if (entry.getValue() instanceof NullInfo) {
                 NetworkLogger.printLog(Level.WARNING, "Finger table incomplete");
                 return next;
             }
@@ -67,7 +66,7 @@ public class LookUpOperation implements Runnable {
                 return next;
             }
         }
-        return  next;
+        return next;
     }
 
 
