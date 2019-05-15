@@ -7,7 +7,6 @@ import com.network.info.NodeInfo;
 import com.network.info.NullInfo;
 import com.network.log.NetworkLogger;
 import com.network.messages.GetPredecessor;
-import com.network.messages.Predecessor;
 import com.network.threads.ThreadPool;
 
 import java.util.logging.Level;

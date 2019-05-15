@@ -11,16 +11,19 @@ import com.network.log.NetworkLogger;
 import com.network.messages.LookUpMessage;
 import com.network.messages.Message;
 import com.network.messages.Notify;
+import com.network.subscriptions.FingerTableUpdate;
 import com.network.subscriptions.JoinHandler;
 import com.network.threads.ThreadPool;
 import com.network.threads.operations.LookUpOperation;
 import com.network.threads.operations.SendMessage;
 import com.network.threads.operations.StabilizeOperation;
+import com.network.threads.operations.UpdateFingers;
 import com.network.utils.IdEncoder;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -29,8 +32,10 @@ public class ChordNode {
     public final static Integer m = 64;
     private final Server server;
     private final BigInteger id;
+
     private InfoInterface predecessor;
     private NodeInfo successor;
+    private ConcurrentHashMap<BigInteger, InfoInterface> fingerTable;
 
     public static void main(String[] args) throws IOException {
         if (args.length < 1) {
@@ -58,6 +63,7 @@ public class ChordNode {
     }
 
     private ChordNode() throws IOException {
+        this.fingerTable = new ConcurrentHashMap<>();
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
@@ -68,9 +74,12 @@ public class ChordNode {
         NetworkLogger.setNodeId(this.id.toString());
         NetworkLogger.printLog(Level.INFO, "Server connection open: " + server.getServerConnection().getIp().toString() + ":" + server.getServerConnection().getPort());
         NetworkLogger.printLog(Level.INFO, "New chord network started");
+
+        this.startFingers();
     }
 
     private ChordNode(InetAddress host, Integer port) throws IOException {
+        this.fingerTable = new ConcurrentHashMap<>();
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
@@ -79,7 +88,9 @@ public class ChordNode {
 
         NetworkLogger.setNodeId(this.id.toString());
         NetworkLogger.printLog(Level.INFO, "Server connection open: " + server.getServerConnection().getIp().toString() + ":" + server.getServerConnection().getPort());
+
         this.join(host, port);
+        this.startFingers();
     }
 
     private void join(InetAddress host, Integer port) throws IOException {
@@ -94,6 +105,18 @@ public class ChordNode {
         Message lookUpMessage = new LookUpMessage(this, this.id);
         ConnectionHandler.getInstance().subscribeLookUp(this.id, new JoinHandler(this));
         ThreadPool.getInstance().submit(new SendMessage(lookUpMessage, connection));
+    }
+
+    private void startFingers() {
+        FingerTableUpdate fingerTableUpdate = new FingerTableUpdate(this);
+        BigInteger two = new BigInteger("2");
+        for (int i = 1; i < m; i++) {
+            BigInteger fingerId = (this.id.add(two.pow(i))).mod(two.pow(m));
+            this.fingerTable.put(fingerId, new NullInfo());
+            ConnectionHandler.getInstance().subscribeLookUp(fingerId, fingerTableUpdate);
+        }
+        ThreadPool.getInstance().scheduleAtFixedRate(new UpdateFingers(this), 0, 500, TimeUnit.MILLISECONDS);
+
     }
 
     public void lookup(LookUpMessage message) {
@@ -138,5 +161,9 @@ public class ChordNode {
             this.predecessor = predecessor;
             NetworkLogger.printLog(Level.INFO, "Predecessor updated - " + predecessor);
         }
+    }
+
+    public ConcurrentHashMap<BigInteger, InfoInterface> getFingerTable() {
+        return fingerTable;
     }
 }
