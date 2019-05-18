@@ -1,0 +1,1 @@
+java -cp out/production/FEUP-SDIS-Proj2/ -Djavax.net.ssl.keyStore=jsse_keys/server.keys -Djavax.net.ssl.keyStorePassword=123456 -Djavax.net.ssl.trustStore=jsse_keys/truststore  -Djavax.net.ssl.trustStorePassword=123456 com.network.ChordNode $1 $2 $3
