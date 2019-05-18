@@ -2,6 +2,7 @@ package com.network.info;
 
 import com.network.ChordNode;
 import com.network.connections.client.ConnectionInterface;
+import com.network.connections.client.JSSETCPConnection;
 import com.network.connections.client.TCPConnection;
 
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class NodeInfo implements Comparable, InfoInterface {
     @Override
     public void startConnection() throws IOException {
         if (this.connection == null) {
-            this.connection = new TCPConnection(node, this.ip, this.port);
+            this.connection = new JSSETCPConnection(node, this.ip, this.port);
             this.connection.start();
         }
     }

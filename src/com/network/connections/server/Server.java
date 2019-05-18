@@ -13,7 +13,7 @@ public class Server implements Runnable{
     private final ServerConnectionInterface serverConnection;
 
     public Server(ChordNode node) throws IOException {
-        this.serverConnection = new ServerConnection(node);
+        this.serverConnection = new JSSEServerConnection(node);
     }
 
     @Override

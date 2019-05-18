@@ -2,6 +2,7 @@ package com.network.threads.operations;
 
 import com.network.ChordNode;
 import com.network.connections.client.ConnectionInterface;
+import com.network.connections.client.JSSETCPConnection;
 import com.network.connections.client.TCPConnection;
 import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
@@ -31,7 +32,7 @@ public class LookUpOperation implements Runnable {
                     && (this.inNode(lookup_id, node.getPredecessor().getId(), node.getId())))
                     || (node.getSuccessor().getId().equals(node.getId()))
             ) {
-                ConnectionInterface connection = new TCPConnection(node, message.getHostname(), message.getPort());
+                ConnectionInterface connection = new JSSETCPConnection(node, message.getHostname(), message.getPort());
                 connection.sendMessage(new LookUpAnsMessage(this.node, message.getId()));
 //                NetworkLogger.printLog(Level.INFO, "Lookup " + message.getId() + " sent to " + message.getHostname() + ":" + message.getPort());
                 return;

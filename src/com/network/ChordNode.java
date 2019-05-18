@@ -2,6 +2,7 @@ package com.network;
 
 import com.network.connections.ConnectionHandler;
 import com.network.connections.client.ConnectionInterface;
+import com.network.connections.client.JSSETCPConnection;
 import com.network.connections.client.TCPConnection;
 import com.network.connections.manager.ConnectionManager;
 import com.network.connections.server.Server;
@@ -98,9 +99,9 @@ public class ChordNode {
     }
 
     private void join(InetAddress host, Integer port) throws IOException {
-        TCPConnection connection = null;
+        JSSETCPConnection connection = null;
         try {
-            connection = new TCPConnection(this, host, port);
+            connection = new JSSETCPConnection(this, host, port);
         } catch (Exception e) {
             NetworkLogger.printLog(Level.SEVERE, "Cannot find network");
             System.exit(-4);
