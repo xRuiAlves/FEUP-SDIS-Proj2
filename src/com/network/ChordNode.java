@@ -3,7 +3,6 @@ package com.network;
 import com.network.connections.ConnectionHandler;
 import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.JSSETCPConnection;
-import com.network.connections.client.TCPConnection;
 import com.network.connections.manager.ConnectionManager;
 import com.network.connections.server.Server;
 import com.network.info.InfoInterface;
@@ -42,32 +41,7 @@ public class ChordNode {
     private ConcurrentLinkedDeque<BigInteger> fingerTableOrder;
     private ConnectionManager manager;
 
-    public static void main(String[] args) throws IOException {
-        if (args.length < 1) {
-            System.err.println("Usage: java ChordNode <start_op> [ <ip> <port> ]");
-            System.exit(-1);
-        }
-
-        switch (args[0]) {
-            case "create":
-                new ChordNode();
-                break;
-            case "join":
-                if (args.length < 3) {
-                    System.err.println("Usage: java join <start_op> <ip> <port>");
-                    System.exit(-1);
-                }
-                InetAddress host = InetAddress.getByName(args[1]);
-                Integer port = Integer.valueOf(args[2]);
-                new ChordNode(host, port);
-                break;
-            default:
-                System.err.println("Operation not supported");
-                break;
-        }
-    }
-
-    private ChordNode() throws IOException {
+    public ChordNode() throws IOException {
         this.manager = new ConnectionManager();
         this.fingerTable = new ConcurrentHashMap<>();
         this.fingerTableOrder = new ConcurrentLinkedDeque<>();
@@ -85,7 +59,7 @@ public class ChordNode {
         this.startFingers();
     }
 
-    private ChordNode(InetAddress host, Integer port) throws IOException {
+    public ChordNode(InetAddress host, Integer port) throws IOException {
         this.manager = new ConnectionManager();
         this.fingerTable = new ConcurrentHashMap<>();
         this.fingerTableOrder = new ConcurrentLinkedDeque<>();
