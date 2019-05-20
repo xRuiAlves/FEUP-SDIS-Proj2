@@ -1,5 +1,6 @@
 package com.app;
 
+import com.network.info.BasicInfo;
 import com.network.info.NodeInfo;
 import com.network.rmi.NodeRMIInterface;
 
@@ -22,7 +23,7 @@ public class TestApp {
             NodeRMIInterface rmiInterface = (NodeRMIInterface) reg.lookup(peer_p);
             switch (operation) {
                 case "LOOKUP":
-                    NodeInfo id = rmiInterface.lookup(BigInteger.ONE);
+                    BasicInfo id = rmiInterface.lookup(BigInteger.ONE);
                     System.out.println(id);
                     break;
 

@@ -1,7 +1,6 @@
 package com.network;
 
 import com.network.log.NetworkLogger;
-import com.network.messages.Message;
 import com.network.rmi.NodeRMI;
 import com.network.rmi.NodeRMIInterface;
 
@@ -47,7 +46,7 @@ public class Main {
     }
 
     private static void establishRMI(ChordNode node) {
-        NodeRMI reBackup = new NodeRMI();
+        NodeRMI reBackup = new NodeRMI(node);
         NodeRMIInterface stub;
         try {
             stub = (NodeRMIInterface) UnicastRemoteObject.exportObject(reBackup, 0);
