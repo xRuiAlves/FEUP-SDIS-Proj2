@@ -11,8 +11,12 @@ import com.network.log.NetworkLogger;
 import com.network.messages.LookUpAnsMessage;
 import com.network.messages.LookUpMessage;
 
+import javax.sound.sampled.Line;
 import java.math.BigInteger;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
 
 public class LookUpOperation implements Runnable {
@@ -51,23 +55,27 @@ public class LookUpOperation implements Runnable {
 
     private NodeInfo findClosestPrecedent(BigInteger lookup_id) {
         BigInteger n = this.node.getId();
-        NodeInfo next = this.node.getSuccessor();
+        NodeInfo targetNode = this.node.getSuccessor();
 
-        if (n.equals(next.getId()) || this.inNode(lookup_id, n, next.getId())) {
-            return next;
+        if (n.equals(targetNode.getId()) || this.inNode(lookup_id, n, targetNode.getId())) {
+            return targetNode;
         }
-        for (Map.Entry<BigInteger, InfoInterface> entry : this.node.getFingerTable().entrySet()) {
-            if (entry.getValue() instanceof NullInfo) {
-                NetworkLogger.printLog(Level.WARNING, "Finger table incomplete");
-                return next;
+
+        ConcurrentLinkedDeque<BigInteger> order = this.node.getFingerTableOrder();
+        ConcurrentHashMap<BigInteger, InfoInterface> fingers = this.node.getFingerTable();
+
+        for (BigInteger i : order) {
+            InfoInterface nodeInfo = fingers.get(i);
+            if (nodeInfo instanceof NullInfo) {
+                continue;
             }
 
-            next = (NodeInfo) entry.getValue();
-            if (this.inNode(entry.getKey(), n, lookup_id)) {
-                return next;
+            if (!this.inNode(nodeInfo.getId(), n, lookup_id)) {
+                return targetNode;
             }
+            targetNode = (NodeInfo) nodeInfo;
         }
-        return next;
+        return targetNode;
     }
 
 

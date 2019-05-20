@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -38,6 +39,7 @@ public class ChordNode {
     private InfoInterface predecessor;
     private NodeInfo successor;
     private ConcurrentHashMap<BigInteger, InfoInterface> fingerTable;
+    private ConcurrentLinkedDeque<BigInteger> fingerTableOrder;
     private ConnectionManager manager;
 
     public static void main(String[] args) throws IOException {
@@ -68,6 +70,7 @@ public class ChordNode {
     private ChordNode() throws IOException {
         this.manager = new ConnectionManager();
         this.fingerTable = new ConcurrentHashMap<>();
+        this.fingerTableOrder = new ConcurrentLinkedDeque<>();
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
@@ -85,6 +88,7 @@ public class ChordNode {
     private ChordNode(InetAddress host, Integer port) throws IOException {
         this.manager = new ConnectionManager();
         this.fingerTable = new ConcurrentHashMap<>();
+        this.fingerTableOrder = new ConcurrentLinkedDeque<>();
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
@@ -117,6 +121,7 @@ public class ChordNode {
         BigInteger two = new BigInteger("2");
         for (int i = 1; i < m; i++) {
             BigInteger fingerId = (this.id.add(two.pow(i))).mod(two.pow(m));
+            this.fingerTableOrder.add(fingerId);
             this.fingerTable.put(fingerId, new NullInfo());
             ConnectionHandler.getInstance().subscribeLookUp(fingerId, fingerTableUpdate);
         }
@@ -170,6 +175,10 @@ public class ChordNode {
 
     public ConcurrentHashMap<BigInteger, InfoInterface> getFingerTable() {
         return fingerTable;
+    }
+
+    public ConcurrentLinkedDeque<BigInteger> getFingerTableOrder() {
+        return fingerTableOrder;
     }
 
     public ConnectionManager getManager() {
