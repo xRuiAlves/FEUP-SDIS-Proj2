@@ -70,6 +70,10 @@ public class LookUpOperation implements Runnable {
                 continue;
             }
 
+            if (nodeInfo.getId().equals(lookup_id)) {
+                return (NodeInfo) nodeInfo;
+            }
+
             if (!this.inNode(nodeInfo.getId(), n, lookup_id)) {
                 return targetNode;
             }

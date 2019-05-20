@@ -31,7 +31,7 @@ public class UpdateFingers implements Runnable {
 
                 ThreadPool.getInstance().submit(new LookUpOperation(node, new LookUpMessage(node, fingerId)));
                 this.next += 1;
-                if (this.next > m) {
+                if (this.next >= m) {
                     this.next = 1;
                 }
             }

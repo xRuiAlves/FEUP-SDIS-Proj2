@@ -23,14 +23,14 @@ public class StabilizeOperation implements Runnable{
     public void run() {
         try {
             if (this.node.getSuccessor() == null) {
-                NetworkLogger.printLog(Level.INFO, "Stabilize not possible");
+//                NetworkLogger.printLog(Level.INFO, "Stabilize not possible");
                 return;
             }
 
             if (this.node.getId().equals(this.node.getSuccessor().getId())) {
                 InfoInterface predecessor = this.node.getPredecessor();
                 if (predecessor instanceof NullInfo) {
-                    NetworkLogger.printLog(Level.INFO, "Stabilize not possible");
+//                    NetworkLogger.printLog(Level.INFO, "Stabilize not possible");
                     return;
                 }
 

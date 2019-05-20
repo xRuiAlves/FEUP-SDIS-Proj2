@@ -27,7 +27,7 @@ public class FingerTableUpdate implements SubscriptionHandlerInterface {
                 InfoInterface finger = node.getFingerTable().get(id);
 
                 if(finger instanceof NullInfo || !finger.getId().equals(msg.getSenderId())) {
-                    NetworkLogger.printLog(Level.INFO, "Updated finger table - " + id + " " + msg.getSenderId());
+//                    NetworkLogger.printLog(Level.INFO, "Updated finger table - " + id + " " + msg.getSenderId());
 
                     if (finger instanceof NodeInfo) {
                         BigInteger fingerId = finger.getId();
@@ -48,7 +48,7 @@ public class FingerTableUpdate implements SubscriptionHandlerInterface {
                     }
 
                 } else {
-                    NetworkLogger.printLog(Level.INFO, "No change to finger table - " + id + " " + msg.getSenderId());
+//                    NetworkLogger.printLog(Level.INFO, "No change to finger table - " + id + " " + msg.getSenderId());
                 }
             } catch (Exception e) {
                 NetworkLogger.printLog(Level.WARNING, "Failure connecting to finger - " + e.getMessage());
