@@ -26,6 +26,6 @@ public class BackupProtocol {
     }
 
     private static void sendFile(BasicInfo basicInfo) {
-        JSSETCPConnection connection =
+        
     }
 }
