@@ -1,7 +1,7 @@
 package com.network.connections.server;
 
 import com.network.ChordNode;
-import com.network.connections.client.ConnectionInterface;
+import com.network.connections.client.Connection;
 import com.network.connections.client.TCPConnection;
 import com.network.utils.IpFinder;
 
@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 
-public class ServerConnection implements ServerConnectionInterface {
+public class TCPServerConnection implements ServerConnectionInterface {
 
     private final ServerSocket serverSocket;
     private InetAddress ip;
     private ChordNode node;
 
-    public ServerConnection(ChordNode node) throws IOException {
+    public TCPServerConnection(ChordNode node) throws IOException {
         this.node = node;
         this.serverSocket = new ServerSocket(0);
         this.ip = IpFinder.findIp();
@@ -32,7 +32,7 @@ public class ServerConnection implements ServerConnectionInterface {
     }
 
     @Override
-    public ConnectionInterface accept() throws IOException {
-        return new TCPConnection(node, this.serverSocket.accept());
+    public Connection accept() throws IOException {
+        return new Connection(node, new TCPConnection(this.serverSocket.accept()));
     }
 }

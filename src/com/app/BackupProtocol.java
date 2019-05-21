@@ -1,16 +1,15 @@
 package com.app;
 
-import com.network.connections.client.JSSETCPConnection;
 import com.network.info.BasicInfo;
 import com.network.rmi.NodeRMIInterface;
 import com.network.utils.IdEncoder;
 
+import java.io.IOException;
 import java.math.BigInteger;
-import java.rmi.RemoteException;
 import java.util.HashSet;
 
 public class BackupProtocol {
-    public static void start(NodeRMIInterface rmiInterface, String file_path) throws RemoteException, InterruptedException {
+    public static void start(NodeRMIInterface rmiInterface, String file_path) throws IOException, InterruptedException {
         HashSet<BigInteger> replication_degrees = new HashSet<>();
 
         for (int i = 0; i < ProtocolDefinitions.REPLICATION_DEGREE; ++i) {
@@ -25,7 +24,7 @@ public class BackupProtocol {
         }
     }
 
-    private static void sendFile(BasicInfo basicInfo) {
-        
+    private static void sendFile(BasicInfo basicInfo) throws IOException {
+        // ConnectionInterface connection = new JSSETCPConnection(basicInfo.getIp(), basicInfo.getPort());
     }
 }

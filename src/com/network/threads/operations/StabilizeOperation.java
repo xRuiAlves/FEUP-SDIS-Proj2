@@ -38,7 +38,7 @@ public class StabilizeOperation implements Runnable{
 
             } else {
                 NodeInfo successor = node.getSuccessor();
-                ThreadPool.getInstance().submit(new SendMessage(new GetPredecessor(this.node), successor.getConnection()));
+                ThreadPool.getInstance().submit(new SendMessage(new GetPredecessor(this.node), successor.getConnection().getInternal()));
             }
 
         } catch (Exception e) {

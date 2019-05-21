@@ -1,7 +1,7 @@
 package com.network.connections.server;
 
 import com.network.ChordNode;
-import com.network.connections.client.ConnectionInterface;
+import com.network.connections.client.Connection;
 import com.network.connections.client.JSSETCPConnection;
 import com.network.utils.IpFinder;
 
@@ -40,7 +40,7 @@ public class JSSEServerConnection implements ServerConnectionInterface {
     }
 
     @Override
-    public ConnectionInterface accept() throws IOException {
-        return new JSSETCPConnection(node, (SSLSocket) this.serverSocket.accept());
+    public Connection accept() throws IOException {
+        return new Connection(node, new JSSETCPConnection((SSLSocket) this.serverSocket.accept()));
     }
 }

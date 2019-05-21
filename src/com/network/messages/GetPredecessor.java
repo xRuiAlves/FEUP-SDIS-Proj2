@@ -10,4 +10,6 @@ public class GetPredecessor extends Message{
         super(node);
     }
 
+    protected GetPredecessor() {
+    }
 }

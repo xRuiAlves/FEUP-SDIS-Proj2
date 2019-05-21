@@ -12,6 +12,9 @@ public class LookUpMessage extends Message {
         this.id = id;
     }
 
+    protected LookUpMessage() {
+    }
+
     public BigInteger getId() {
         return id;
     }

@@ -5,7 +5,7 @@ import com.network.messages.Message;
 import java.io.IOException;
 import java.net.InetAddress;
 
-public interface ConnectionInterface extends Runnable {
+public interface ConnectionInterface {
 
     void sendMessage(Message message) throws IOException;
 
@@ -16,8 +16,6 @@ public interface ConnectionInterface extends Runnable {
     InetAddress getIp();
 
     Integer getPort();
-
-    void start();
 
     boolean isClosed();
 }

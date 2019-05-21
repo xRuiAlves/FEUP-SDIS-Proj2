@@ -1,8 +1,10 @@
 package com.network;
 
 import com.network.connections.ConnectionHandler;
+import com.network.connections.client.Connection;
 import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.JSSETCPConnection;
+import com.network.connections.client.TCPConnection;
 import com.network.connections.manager.ConnectionManager;
 import com.network.connections.server.Server;
 import com.network.info.InfoInterface;
@@ -77,9 +79,9 @@ public class ChordNode {
     }
 
     private void join(InetAddress host, Integer port) throws IOException {
-        JSSETCPConnection connection = null;
+        Connection connection = null;
         try {
-            connection = new JSSETCPConnection(this, host, port);
+            connection = new Connection(this, new JSSETCPConnection(host, port));
         } catch (Exception e) {
             NetworkLogger.printLog(Level.SEVERE, "Cannot find network");
             System.exit(-4);
@@ -87,7 +89,7 @@ public class ChordNode {
         NetworkLogger.printLog(Level.INFO, "Connection established");
         Message lookUpMessage = new LookUpMessage(this, this.id);
         ConnectionHandler.getInstance().subscribeLookUp(this.id, new JoinHandler(this));
-        ThreadPool.getInstance().submit(new SendMessage(lookUpMessage, connection));
+        ThreadPool.getInstance().submit(new SendMessage(lookUpMessage, connection.getInternal()));
     }
 
     private void startFingers() {
@@ -126,7 +128,7 @@ public class ChordNode {
             }
         }
         if (this.successor != null) {
-            ConnectionInterface connection = this.successor.getConnection();
+            ConnectionInterface connection = this.successor.getConnection().getInternal();
             if (connection != null)
                 ThreadPool.getInstance().submit(new SendMessage(new Notify(this, this.id), connection));
         }

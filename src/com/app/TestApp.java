@@ -2,13 +2,10 @@ package com.app;
 
 import com.network.info.BasicInfo;
 import com.network.rmi.NodeRMIInterface;
-import com.network.utils.IdEncoder;
 
 import java.math.BigInteger;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
 
 public class TestApp {
     public static void main(String[] args) {
@@ -21,7 +18,7 @@ public class TestApp {
         String operation = args[1].toUpperCase();
 
         try {
-            Registry reg = LocateRegistry.getRegistry("localhost");
+            Registry reg = LocateRegistry.getRegistry();
             NodeRMIInterface rmiInterface = (NodeRMIInterface) reg.lookup(peer_p);
             switch (operation) {
                 case "LOOKUP":

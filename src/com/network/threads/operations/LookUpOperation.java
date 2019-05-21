@@ -1,6 +1,7 @@
 package com.network.threads.operations;
 
 import com.network.ChordNode;
+import com.network.connections.client.Connection;
 import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.JSSETCPConnection;
 import com.network.connections.client.TCPConnection;
@@ -29,24 +30,24 @@ public class LookUpOperation implements Runnable {
     }
 
     public void run() {
+        BigInteger lookup_id = message.getId();
         try {
-            BigInteger lookup_id = message.getId();
             if (lookup_id.equals(node.getId())
                     || (node.getPredecessor() != null
                     && (this.inNode(lookup_id, node.getPredecessor().getId(), node.getId())))
                     || (node.getSuccessor().getId().equals(node.getId()))
             ) {
-                ConnectionInterface connection = new JSSETCPConnection(node, message.getHostname(), message.getPort());
-                connection.sendMessage(new LookUpAnsMessage(this.node, message.getId()));
+                Connection connection = new Connection(node, new JSSETCPConnection(message.getHostname(), message.getPort()));
+                connection.getInternal().sendMessage(new LookUpAnsMessage(this.node, message.getId()));
 //                NetworkLogger.printLog(Level.INFO, "Lookup " + message.getId() + " sent to " + message.getHostname() + ":" + message.getPort());
                 return;
             }
 
             NodeInfo closestPrecedent = this.findClosestPrecedent(lookup_id);
-            closestPrecedent.getConnection().sendMessage(message);
+            closestPrecedent.getConnection().getInternal().sendMessage(message);
 
         } catch (Exception e) {
-            NetworkLogger.printLog(Level.WARNING, "Error in lookup operation - " + e.getMessage());
+            NetworkLogger.printLog(Level.WARNING, "Error in lookup " + lookup_id + " operation - " + e.getMessage());
             if (this.node.getSuccessor() == null) {
                 System.exit(-3);
             }

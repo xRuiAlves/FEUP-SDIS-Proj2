@@ -1,5 +1,6 @@
 package com.network.connections.server;
 
+import com.network.connections.client.Connection;
 import com.network.connections.client.ConnectionInterface;
 import com.network.log.NetworkLogger;
 import com.network.threads.ThreadPool;
@@ -20,7 +21,7 @@ public class Server implements Runnable{
     public void run() {
         while (true) {
             try {
-                ConnectionInterface  connection = this.serverConnection.accept();
+                Connection connection = this.serverConnection.accept();
                 ThreadPool.getInstance().submit(connection);
             } catch (IOException e) {
                 NetworkLogger.printLog(Level.WARNING, "Error accepting connection - " + e.getMessage());

@@ -1,8 +1,6 @@
 package com.network.connections.client;
 
-import com.network.ChordNode;
 import com.network.messages.Message;
-import com.network.threads.ThreadPool;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -10,16 +8,15 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-public class TCPConnection extends Connection {
+public class TCPConnection implements ConnectionInterface {
 
     private final InetAddress ip;
     private final Socket socket;
-    private  ObjectInputStream inputStream;
-    private ObjectOutputStream outputStream;
-    private Integer port;
+    private final ObjectInputStream inputStream;
+    private final ObjectOutputStream outputStream;
+    private final Integer port;
 
-    public TCPConnection(ChordNode node, InetAddress ip, Integer port) throws IOException {
-        super(node);
+    public TCPConnection(InetAddress ip, Integer port) throws IOException {
         this.ip = ip;
         this.port = port;
         this.socket = new Socket(ip, port);
@@ -27,8 +24,7 @@ public class TCPConnection extends Connection {
         this.inputStream = new ObjectInputStream(this.socket.getInputStream());
     }
 
-    public TCPConnection(ChordNode node, Socket socket) throws IOException {
-        super(node);
+    public TCPConnection(Socket socket) throws IOException {
         this.ip = socket.getInetAddress();
         this.port = socket.getPort();
         this.socket = socket;
@@ -59,11 +55,6 @@ public class TCPConnection extends Connection {
     @Override
     public Integer getPort() {
         return port;
-    }
-
-    @Override
-    public void start() {
-        ThreadPool.getInstance().submit(this);
     }
 
     @Override

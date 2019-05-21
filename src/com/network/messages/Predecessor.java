@@ -13,6 +13,9 @@ public class Predecessor extends Message{
         this.id = node.getPredecessor().getId();
     }
 
+    protected Predecessor() {
+    }
+
     public BigInteger getId() {
         return id;
     }

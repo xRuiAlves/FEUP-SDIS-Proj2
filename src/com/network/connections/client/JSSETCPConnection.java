@@ -1,8 +1,6 @@
 package com.network.connections.client;
 
-import com.network.ChordNode;
 import com.network.messages.Message;
-import com.network.threads.ThreadPool;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -10,18 +8,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
-import java.net.Socket;
 
-public class JSSETCPConnection extends Connection {
-
+public class JSSETCPConnection implements ConnectionInterface {
     private final InetAddress ip;
     private final SSLSocket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private Integer port;
 
-    public JSSETCPConnection(ChordNode node, InetAddress ip, Integer port) throws IOException {
-        super(node);
+    public JSSETCPConnection(InetAddress ip, Integer port) throws IOException {
         this.ip = ip;
         this.port = port;
 
@@ -32,8 +27,7 @@ public class JSSETCPConnection extends Connection {
         this.inputStream = new ObjectInputStream(this.socket.getInputStream());
     }
 
-    public JSSETCPConnection(ChordNode node, SSLSocket socket) throws IOException {
-        super(node);
+    public JSSETCPConnection(SSLSocket socket) throws IOException {
         this.ip = socket.getInetAddress();
         this.port = socket.getPort();
         this.socket = socket;
@@ -64,11 +58,6 @@ public class JSSETCPConnection extends Connection {
     @Override
     public Integer getPort() {
         return port;
-    }
-
-    @Override
-    public void start() {
-        ThreadPool.getInstance().submit(this);
     }
 
     @Override

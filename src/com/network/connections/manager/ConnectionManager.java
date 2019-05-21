@@ -1,6 +1,7 @@
 package com.network.connections.manager;
 
 import com.network.ChordNode;
+import com.network.connections.client.Connection;
 import com.network.connections.client.ConnectionInterface;
 
 import java.math.BigInteger;
@@ -18,7 +19,7 @@ public class ConnectionManager {
         return this.connections.containsKey(id);
     }
 
-    public ConnectionInterface get(BigInteger id) {
+    public Connection get(BigInteger id) {
         ConnectionCounter connectionCounter = this.connections.get(id);
         connectionCounter.inc();
         return connectionCounter.getConnection();
@@ -30,7 +31,7 @@ public class ConnectionManager {
         }
     }
 
-    public void put(BigInteger senderId, ConnectionInterface connection) {
+    public void put(BigInteger senderId, Connection connection) {
         this.connections.put(senderId, new ConnectionCounter(connection));
     }
 

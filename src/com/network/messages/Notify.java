@@ -12,6 +12,9 @@ public class Notify extends Message {
         this.id = id;
     }
 
+    protected Notify() {
+    }
+
     public BigInteger getId() {
         return id;
     }

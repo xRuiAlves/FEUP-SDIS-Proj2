@@ -8,31 +8,38 @@ import com.network.messages.*;
 import com.network.threads.ThreadPool;
 import com.network.threads.operations.SendMessage;
 
+import java.io.EOFException;
+import java.io.StreamCorruptedException;
 import java.util.logging.Level;
 
-public abstract class Connection implements ConnectionInterface {
-
+public class Connection implements Runnable {
+    private final ConnectionInterface ci;
     private ChordNode node;
 
-    protected Connection(ChordNode node) {
+    public Connection(ChordNode node, ConnectionInterface ci) {
+        this.ci = ci;
         this.node = node;
+    }
+
+    public void start() {
+        ThreadPool.getInstance().submit(this);
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                Message message = this.getMessage();
+                Message message = this.ci.getMessage();
                 //NetworkLogger.printLog(Level.INFO, "Message Received - " + message.getClass().getSimpleName());
                 if (message instanceof LookUpAnsMessage) {
                     ConnectionHandler.getInstance().notify((LookUpAnsMessage) message);
-                    this.close();
+                    this.ci.close();
                     return;
                 } else if (message instanceof LookUpMessage) {
                     this.node.lookup((LookUpMessage) message);
                 } else if (message instanceof GetPredecessor) {
                     // The same socket is live until the node that asks closes it
-                    ThreadPool.getInstance().submit(new SendMessage(new Predecessor(this.node), this));
+                    ThreadPool.getInstance().submit(new SendMessage(new Predecessor(this.node), this.ci));
                 } else if (message instanceof Predecessor) {
                     this.node.setSuccessor(new NodeInfo(node, ((Predecessor) message).getId(), message.getHostname(), message.getPort()));
                 } else if (message instanceof Notify) {
@@ -41,14 +48,18 @@ public abstract class Connection implements ConnectionInterface {
                     NetworkLogger.printLog(Level.SEVERE, "Message type not supported");
                 }
 
+            } catch (EOFException ignored) {
+                NetworkLogger.printLog(Level.INFO, "Connection closed by peer");
+                return;
             } catch (Exception e) {
-                if (this.isClosed()) {
-                    NetworkLogger.printLog(Level.INFO, "Connection closed");
-                    return;
-                }
                 NetworkLogger.printLog(Level.WARNING, "Error receiving message - " + e.getMessage());
+                e.printStackTrace();
                 return;
             }
         }
+    }
+
+    public ConnectionInterface getInternal() {
+        return ci;
     }
 }

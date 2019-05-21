@@ -25,6 +25,9 @@ public abstract class Message implements Serializable {
         this.port = node.getServer().getServerConnection().getPort();
     }
 
+    protected Message() {
+    }
+
     public BigInteger getSenderId() {
         return senderId;
     }

@@ -1,5 +1,5 @@
 package com.app;
 
 public class ProtocolDefinitions {
-    public static final int REPLICATION_DEGREE = 1;
+    public static final int REPLICATION_DEGREE = 3;
 }

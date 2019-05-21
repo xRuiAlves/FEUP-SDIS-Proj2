@@ -15,6 +15,7 @@ import java.util.logging.Level;
 public class Main {
 
     public static final String rmiPrefix = "node-";
+    private static NodeRMI hodor;
 
     public static void main(String[] args) throws IOException {
         if (args.length < 1) {
@@ -46,21 +47,22 @@ public class Main {
     }
 
     private static void establishRMI(ChordNode node) {
-        NodeRMI reBackup = new NodeRMI(node);
+        hodor = new NodeRMI(node);
         NodeRMIInterface stub;
         try {
-            stub = (NodeRMIInterface) UnicastRemoteObject.exportObject(reBackup, 0);
+            stub = (NodeRMIInterface) UnicastRemoteObject.exportObject(hodor, 0);
             Registry reg;
+            final String rmi_name = rmiPrefix + node.getId();
             try {
                 reg = LocateRegistry.getRegistry();
-                reg.rebind(rmiPrefix + node.getId(), stub);
+                reg.rebind(rmi_name, stub);
             } catch (RemoteException e) {
                 NetworkLogger.printLog(Level.INFO, "Tries to create Registry");
                 reg = LocateRegistry.createRegistry(1099);
-                reg.rebind(rmiPrefix + node.getId(), stub);
+                reg.rebind(rmi_name, stub);
             }
 
-            NetworkLogger.printLog(Level.INFO, "RMI established " + rmiPrefix + node.getId());
+            NetworkLogger.printLog(Level.INFO, "RMI established " + rmi_name);
         } catch (RemoteException e) {
             NetworkLogger.printLog(Level.SEVERE, "Failed establishing RMI - " + e.getMessage());
         }
