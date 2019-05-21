@@ -1,12 +1,14 @@
 package com.app;
 
 import com.network.info.BasicInfo;
-import com.network.info.NodeInfo;
 import com.network.rmi.NodeRMIInterface;
+import com.network.utils.IdEncoder;
 
 import java.math.BigInteger;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 
 public class TestApp {
     public static void main(String[] args) {
@@ -25,6 +27,9 @@ public class TestApp {
                 case "LOOKUP":
                     BasicInfo id = rmiInterface.lookup(BigInteger.ONE);
                     System.out.println(id);
+                    break;
+                case "BACKUP":
+                    BackupProtocol.start(rmiInterface, "test_files/tiny.txt");
                     break;
 
                 default:

@@ -15,7 +15,6 @@ public abstract class Connection implements ConnectionInterface {
     private ChordNode node;
 
     protected Connection(ChordNode node) {
-
         this.node = node;
     }
 

@@ -1,4 +1,4 @@
-package com.network.storage;
+package com.network.storage.io;
 
 @FunctionalInterface
 public interface FileWrittenHandler {

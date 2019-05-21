@@ -23,7 +23,7 @@ public class Main {
         }
 
         ChordNode node = null;
-        switch (args[0]) {
+        switch (args[0].toLowerCase()) {
             case "create":
                 node = new ChordNode();
                 break;
