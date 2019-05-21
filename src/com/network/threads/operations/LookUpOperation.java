@@ -39,7 +39,7 @@ public class LookUpOperation implements Runnable {
             ) {
                 Connection connection = new Connection(node, new JSSETCPConnection(message.getHostname(), message.getPort()));
                 connection.getInternal().sendMessage(new LookUpAnsMessage(this.node, message.getId()));
-//                NetworkLogger.printLog(Level.INFO, "Lookup " + message.getId() + " sent to " + message.getHostname() + ":" + message.getPort());
+                // NetworkLogger.printLog(Level.INFO, "Lookup " + message.getId() + " sent to " + message.getHostname() + ":" + message.getPort());
                 return;
             }
 

@@ -36,7 +36,7 @@ public class JSSETCPConnection implements ConnectionInterface {
     }
 
     @Override
-    public void sendMessage(Message message) throws IOException {
+    public synchronized void sendMessage(Message message) throws IOException {
         this.outputStream.writeObject(message);
     }
 

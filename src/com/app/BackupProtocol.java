@@ -1,5 +1,7 @@
 package com.app;
 
+import com.network.connections.client.ConnectionInterface;
+import com.network.connections.client.JSSETCPConnection;
 import com.network.info.BasicInfo;
 import com.network.rmi.NodeRMIInterface;
 import com.network.utils.IdEncoder;
