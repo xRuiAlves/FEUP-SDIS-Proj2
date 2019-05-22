@@ -27,6 +27,8 @@ public class JSSEServerConnection implements ServerConnectionInterface {
         int port = rand.nextInt(50000) + 10000;
 
         this.serverSocket = (SSLServerSocket) factory.createServerSocket(port);
+        this.serverSocket.setNeedClientAuth(true);
+        this.serverSocket.setEnabledCipherSuites(new String[]{"TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA"});
     }
 
     @Override

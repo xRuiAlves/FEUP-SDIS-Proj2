@@ -22,6 +22,7 @@ public class JSSETCPConnection implements ConnectionInterface {
 
         SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
         socket = (SSLSocket) factory.createSocket(ip, port);
+        this.socket.setEnabledCipherSuites(new String[]{"TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA"});
 
         this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
         this.inputStream = new ObjectInputStream(this.socket.getInputStream());
