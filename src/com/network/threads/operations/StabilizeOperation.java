@@ -2,6 +2,7 @@ package com.network.threads.operations;
 
 
 import com.network.ChordNode;
+import com.network.connections.client.ConnectionInterface;
 import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
 import com.network.info.NullInfo;
@@ -22,7 +23,6 @@ public class StabilizeOperation implements Runnable{
     @Override
     public void run() {
 
-        // TODO: Check if successor failed
         try {
             if (this.node.getSuccessor() == null) {
 //                NetworkLogger.printLog(Level.INFO, "Stabilize not possible");
@@ -40,7 +40,13 @@ public class StabilizeOperation implements Runnable{
 
             } else {
                 NodeInfo successor = node.getSuccessor();
-                ThreadPool.getInstance().submit(new SendMessage(new GetPredecessor(this.node), successor.getListener().getInternal()));
+                ConnectionInterface connection = successor.getListener().getInternal();
+                if (connection.isClosed()) {
+                    NetworkLogger.printLog(Level.SEVERE, "Successor disconnected");
+                    NetworkLogger.printLog(Level.SEVERE, "No fault tolerance implemented - exiting");
+                    System.exit(-1);
+                }
+                ThreadPool.getInstance().submit(new SendMessage(new GetPredecessor(this.node), connection));
             }
 
         } catch (Exception e) {

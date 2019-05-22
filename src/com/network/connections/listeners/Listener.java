@@ -26,8 +26,8 @@ public class Listener implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
-            try {
+        try {
+            while (true) {
                 Message message = this.ci.getMessage();
                 //NetworkLogger.printLog(Level.INFO, "Message Received - " + message.getClass().getSimpleName());
 
@@ -35,16 +35,14 @@ public class Listener implements Runnable {
                     this.ci.close();
                     return;
                 }
-
-
-            } catch (EOFException ignored) {
-                NetworkLogger.printLog(Level.INFO, "Connection closed by peer");
-                return;
-            } catch (Exception e) {
-                NetworkLogger.printLog(Level.WARNING, "Error receiving message - " + e.getMessage());
-                return;
             }
+        } catch (EOFException ignored) {
+            NetworkLogger.printLog(Level.INFO, "Connection closed by peer");
+        } catch (Exception e) {
+            NetworkLogger.printLog(Level.WARNING, "Error receiving message - " + e.getMessage());
         }
+
+        this.ci.setClosed(true);
     }
 
     public ConnectionInterface getInternal() {

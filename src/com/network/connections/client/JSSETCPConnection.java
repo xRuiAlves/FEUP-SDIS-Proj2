@@ -15,6 +15,7 @@ public class JSSETCPConnection implements ConnectionInterface {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private Integer port;
+    private boolean closed = false;
 
     public JSSETCPConnection(InetAddress ip, Integer port) throws IOException {
         this.ip = ip;
@@ -63,6 +64,11 @@ public class JSSETCPConnection implements ConnectionInterface {
 
     @Override
     public boolean isClosed() {
-        return this.socket.isClosed() || !this.socket.isConnected();
+        return this.closed || this.socket.isClosed() || !this.socket.isConnected();
+    }
+
+    @Override
+    public void setClosed(boolean closed) {
+        this.closed = closed;
     }
 }

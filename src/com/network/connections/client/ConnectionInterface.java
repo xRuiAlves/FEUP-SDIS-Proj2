@@ -18,4 +18,6 @@ public interface ConnectionInterface {
     Integer getPort();
 
     boolean isClosed();
+
+    void setClosed(boolean b);
 }
