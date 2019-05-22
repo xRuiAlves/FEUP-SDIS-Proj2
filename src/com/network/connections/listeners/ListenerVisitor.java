@@ -83,8 +83,7 @@ public class ListenerVisitor extends DefaultListener {
 
             });
         } catch (IOException e) {
-            if (!l.ci.isClosed())
-                l.ci.sendMessage(new No());
+            l.ci.sendMessage(new No());
         }
     }
 
@@ -113,8 +112,7 @@ public class ListenerVisitor extends DefaultListener {
                 }
             });
         } catch (IOException e) {
-            if (!l.ci.isClosed())
-                l.ci.sendMessage(new No());
+            l.ci.sendMessage(new No());
         }
     }
 }
