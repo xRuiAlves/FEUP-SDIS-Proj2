@@ -1,7 +1,7 @@
 package com.network.connections;
 
 import com.network.log.NetworkLogger;
-import com.network.messages.LookUpAnsMessage;
+import com.network.messages.chord.LookUpAnswer;
 import com.network.subscriptions.SubscriptionHandlerInterface;
 
 import java.math.BigInteger;
@@ -36,7 +36,7 @@ public class ConnectionHandler implements ConnectionHandlerInterface {
     }
 
     @Override
-    public void notify(LookUpAnsMessage message) {
+    public void notify(LookUpAnswer message) {
         if (this.lookUps.containsKey(message.getId())) {
             ConcurrentLinkedDeque<SubscriptionHandlerInterface> deque = this.lookUps.get(message.getId());
             if (deque.size() == 0) {

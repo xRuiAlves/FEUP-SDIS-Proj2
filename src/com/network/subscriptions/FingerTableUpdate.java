@@ -5,8 +5,8 @@ import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
 import com.network.info.NullInfo;
 import com.network.log.NetworkLogger;
-import com.network.messages.LookUpAnsMessage;
-import com.network.messages.Message;
+import com.network.messages.chord.ChordMessage;
+import com.network.messages.chord.LookUpAnswer;
 
 import java.math.BigInteger;
 import java.util.logging.Level;
@@ -20,10 +20,10 @@ public class FingerTableUpdate implements SubscriptionHandlerInterface {
     }
 
     @Override
-    public void notify(Message msg) {
-        if (msg instanceof LookUpAnsMessage) {
+    public void notify(ChordMessage msg) {
+        if (msg instanceof LookUpAnswer) {
             try {
-                BigInteger id = ((LookUpAnsMessage) msg).getId();
+                BigInteger id = ((LookUpAnswer) msg).getId();
                 InfoInterface finger = node.getFingerTable().get(id);
 
                 if(finger instanceof NullInfo || !finger.getId().equals(msg.getSenderId())) {
@@ -44,7 +44,7 @@ public class FingerTableUpdate implements SubscriptionHandlerInterface {
                         NodeInfo newConnection = new NodeInfo(this.node, msg.getSenderId(), msg.getHostname(), msg.getPort());
                         newConnection.startConnection();
                         node.getFingerTable().put(id, newConnection);
-                        node.getManager().put(msg.getSenderId(), newConnection.getConnection());
+                        node.getManager().put(msg.getSenderId(), newConnection.getListener());
                     }
 
                 } else {

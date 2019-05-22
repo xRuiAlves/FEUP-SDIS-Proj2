@@ -2,7 +2,7 @@ package com.network.subscriptions;
 
 import com.network.info.NodeInfo;
 import com.network.log.NetworkLogger;
-import com.network.messages.Message;
+import com.network.messages.chord.ChordMessage;
 import com.network.ChordNode;
 
 import java.util.logging.Level;
@@ -15,7 +15,7 @@ public class JoinHandler implements SubscriptionHandlerInterface {
         this.node = node;
     }
     @Override
-    public void notify(Message msg) {
+    public void notify(ChordMessage msg) {
         if (node.getId().equals(msg.getSenderId())) {
             NetworkLogger.printLog(Level.SEVERE, "Node id already taken");
             System.exit(-5);

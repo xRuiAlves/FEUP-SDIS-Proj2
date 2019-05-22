@@ -1,9 +1,9 @@
 package com.network.subscriptions;
 
-import com.network.messages.Message;
+import com.network.messages.chord.ChordMessage;
 
 public interface SubscriptionHandlerInterface {
-    void notify(Message msg);
+    void notify(ChordMessage msg);
 
     boolean isPermanent();
 }

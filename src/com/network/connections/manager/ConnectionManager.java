@@ -1,8 +1,6 @@
 package com.network.connections.manager;
 
-import com.network.ChordNode;
-import com.network.connections.client.Connection;
-import com.network.connections.client.ConnectionInterface;
+import com.network.connections.listeners.Listener;
 
 import java.math.BigInteger;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,10 +17,10 @@ public class ConnectionManager {
         return this.connections.containsKey(id);
     }
 
-    public Connection get(BigInteger id) {
+    public Listener get(BigInteger id) {
         ConnectionCounter connectionCounter = this.connections.get(id);
         connectionCounter.inc();
-        return connectionCounter.getConnection();
+        return connectionCounter.getListener();
     }
 
     public void decreaseInterface(BigInteger id) {
@@ -31,8 +29,8 @@ public class ConnectionManager {
         }
     }
 
-    public void put(BigInteger senderId, Connection connection) {
-        this.connections.put(senderId, new ConnectionCounter(connection));
+    public void put(BigInteger senderId, Listener listener) {
+        this.connections.put(senderId, new ConnectionCounter(listener));
     }
 
     public ConcurrentHashMap<BigInteger, ConnectionCounter> getConnections() {

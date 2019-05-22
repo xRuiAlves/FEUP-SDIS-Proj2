@@ -1,10 +1,9 @@
 package com.network.connections.server;
 
-import com.network.connections.client.Connection;
-import com.network.connections.client.ConnectionInterface;
+import com.network.ChordNode;
+import com.network.connections.listeners.Listener;
 import com.network.log.NetworkLogger;
 import com.network.threads.ThreadPool;
-import com.network.ChordNode;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -21,8 +20,8 @@ public class Server implements Runnable{
     public void run() {
         while (true) {
             try {
-                Connection connection = this.serverConnection.accept();
-                ThreadPool.getInstance().submit(connection);
+                Listener listener = this.serverConnection.accept();
+                ThreadPool.getInstance().submit(listener);
             } catch (IOException e) {
                 NetworkLogger.printLog(Level.WARNING, "Error accepting connection - " + e.getMessage());
             }

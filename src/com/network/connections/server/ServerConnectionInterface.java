@@ -1,6 +1,6 @@
 package com.network.connections.server;
 
-import com.network.connections.client.Connection;
+import com.network.connections.listeners.Listener;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -10,5 +10,5 @@ public interface ServerConnectionInterface {
 
     Integer getPort();
 
-    Connection accept() throws IOException;
+    Listener accept() throws IOException;
 }

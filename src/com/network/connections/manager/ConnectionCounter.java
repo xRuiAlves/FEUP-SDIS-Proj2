@@ -1,14 +1,14 @@
 package com.network.connections.manager;
 
-import com.network.connections.client.Connection;
+import com.network.connections.listeners.Listener;
 
 public class ConnectionCounter {
 
     private int count;
-    private Connection connection;
+    private Listener listener;
 
-    public ConnectionCounter(Connection connection) {
-        this.connection = connection;
+    public ConnectionCounter(Listener listener) {
+        this.listener = listener;
         this.count = 0;
     }
 
@@ -26,7 +26,7 @@ public class ConnectionCounter {
         return count;
     }
 
-    public Connection getConnection() {
-        return connection;
+    public Listener getListener() {
+        return listener;
     }
 }

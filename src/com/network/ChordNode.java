@@ -1,19 +1,18 @@
 package com.network;
 
 import com.network.connections.ConnectionHandler;
-import com.network.connections.client.Connection;
+import com.network.connections.listeners.Listener;
 import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.JSSETCPConnection;
-import com.network.connections.client.TCPConnection;
 import com.network.connections.manager.ConnectionManager;
 import com.network.connections.server.Server;
 import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
 import com.network.info.NullInfo;
 import com.network.log.NetworkLogger;
-import com.network.messages.LookUpMessage;
+import com.network.messages.chord.LookUp;
 import com.network.messages.Message;
-import com.network.messages.Notify;
+import com.network.messages.chord.Notify;
 import com.network.subscriptions.FingerTableUpdate;
 import com.network.subscriptions.JoinHandler;
 import com.network.threads.ThreadPool;
@@ -79,17 +78,17 @@ public class ChordNode {
     }
 
     private void join(InetAddress host, Integer port) throws IOException {
-        Connection connection = null;
+        Listener listener = null;
         try {
-            connection = new Connection(this, new JSSETCPConnection(host, port));
+            listener = new Listener(this, new JSSETCPConnection(host, port));
         } catch (Exception e) {
             NetworkLogger.printLog(Level.SEVERE, "Cannot find network");
             System.exit(-4);
         }
         NetworkLogger.printLog(Level.INFO, "Connection established");
-        Message lookUpMessage = new LookUpMessage(this, this.id);
+        Message lookUpMessage = new LookUp(this, this.id);
         ConnectionHandler.getInstance().subscribeLookUp(this.id, new JoinHandler(this));
-        ThreadPool.getInstance().submit(new SendMessage(lookUpMessage, connection.getInternal()));
+        ThreadPool.getInstance().submit(new SendMessage(lookUpMessage, listener.getInternal()));
     }
 
     private void startFingers() {
@@ -105,7 +104,7 @@ public class ChordNode {
 
     }
 
-    public void lookup(LookUpMessage message) {
+    public void lookup(LookUp message) {
         ThreadPool.getInstance().submit(new LookUpOperation(this, message));
     }
 
@@ -128,7 +127,7 @@ public class ChordNode {
             }
         }
         if (this.successor != null) {
-            ConnectionInterface connection = this.successor.getConnection().getInternal();
+            ConnectionInterface connection = this.successor.getListener().getInternal();
             if (connection != null)
                 ThreadPool.getInstance().submit(new SendMessage(new Notify(this, this.id), connection));
         }

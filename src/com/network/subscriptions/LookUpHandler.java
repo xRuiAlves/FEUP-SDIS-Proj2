@@ -1,8 +1,7 @@
 package com.network.subscriptions;
 
 import com.network.info.BasicInfo;
-import com.network.info.NodeInfo;
-import com.network.messages.Message;
+import com.network.messages.chord.ChordMessage;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -24,7 +23,7 @@ public class LookUpHandler implements SubscriptionHandlerInterface {
     }
 
     @Override
-    public void notify(Message msg) {
+    public void notify(ChordMessage msg) {
         this.info = new BasicInfo(msg.getHostname(), msg.getPort());
         this.latch.countDown();
     }

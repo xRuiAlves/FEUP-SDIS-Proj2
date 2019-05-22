@@ -1,34 +1,30 @@
 package com.network.threads.operations;
 
 import com.network.ChordNode;
-import com.network.connections.client.Connection;
-import com.network.connections.client.ConnectionInterface;
+import com.network.connections.listeners.Listener;
 import com.network.connections.client.JSSETCPConnection;
-import com.network.connections.client.TCPConnection;
 import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
 import com.network.info.NullInfo;
 import com.network.log.NetworkLogger;
-import com.network.messages.LookUpAnsMessage;
-import com.network.messages.LookUpMessage;
+import com.network.messages.chord.LookUpAnswer;
+import com.network.messages.chord.LookUp;
 
-import javax.sound.sampled.Line;
 import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
 
 public class LookUpOperation implements Runnable {
     private final ChordNode node;
-    private LookUpMessage message;
+    private LookUp message;
 
-    public LookUpOperation(ChordNode node, LookUpMessage message) {
+    public LookUpOperation(ChordNode node, LookUp message) {
         this.node = node;
         this.message = message;
     }
 
+    @Override
     public void run() {
         BigInteger lookup_id = message.getId();
         try {
@@ -37,14 +33,14 @@ public class LookUpOperation implements Runnable {
                     && (this.inNode(lookup_id, node.getPredecessor().getId(), node.getId())))
                     || (node.getSuccessor().getId().equals(node.getId()))
             ) {
-                Connection connection = new Connection(node, new JSSETCPConnection(message.getHostname(), message.getPort()));
-                connection.getInternal().sendMessage(new LookUpAnsMessage(this.node, message.getId()));
+                Listener listener = new Listener(node, new JSSETCPConnection(message.getHostname(), message.getPort()));
+                listener.getInternal().sendMessage(new LookUpAnswer(this.node, message.getId()));
                 // NetworkLogger.printLog(Level.INFO, "Lookup " + message.getId() + " sent to " + message.getHostname() + ":" + message.getPort());
                 return;
             }
 
             NodeInfo closestPrecedent = this.findClosestPrecedent(lookup_id);
-            closestPrecedent.getConnection().getInternal().sendMessage(message);
+            closestPrecedent.getListener().getInternal().sendMessage(message);
 
         } catch (Exception e) {
             NetworkLogger.printLog(Level.WARNING, "Error in lookup " + lookup_id + " operation - " + e.getMessage());

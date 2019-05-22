@@ -6,7 +6,7 @@ import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
 import com.network.info.NullInfo;
 import com.network.log.NetworkLogger;
-import com.network.messages.GetPredecessor;
+import com.network.messages.chord.GetPredecessor;
 import com.network.threads.ThreadPool;
 
 import java.util.logging.Level;
@@ -38,7 +38,7 @@ public class StabilizeOperation implements Runnable{
 
             } else {
                 NodeInfo successor = node.getSuccessor();
-                ThreadPool.getInstance().submit(new SendMessage(new GetPredecessor(this.node), successor.getConnection().getInternal()));
+                ThreadPool.getInstance().submit(new SendMessage(new GetPredecessor(this.node), successor.getListener().getInternal()));
             }
 
         } catch (Exception e) {

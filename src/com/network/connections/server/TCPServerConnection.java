@@ -1,7 +1,7 @@
 package com.network.connections.server;
 
 import com.network.ChordNode;
-import com.network.connections.client.Connection;
+import com.network.connections.listeners.Listener;
 import com.network.connections.client.TCPConnection;
 import com.network.utils.IpFinder;
 
@@ -32,7 +32,7 @@ public class TCPServerConnection implements ServerConnectionInterface {
     }
 
     @Override
-    public Connection accept() throws IOException {
-        return new Connection(node, new TCPConnection(this.serverSocket.accept()));
+    public Listener accept() throws IOException {
+        return new Listener(node, new TCPConnection(this.serverSocket.accept()));
     }
 }
