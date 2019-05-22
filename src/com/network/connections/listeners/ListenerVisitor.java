@@ -4,10 +4,7 @@ import com.network.connections.ConnectionHandler;
 import com.network.info.NodeInfo;
 import com.network.log.NetworkLogger;
 import com.network.messages.chord.*;
-import com.network.messages.protocol.Backup;
-import com.network.messages.protocol.No;
-import com.network.messages.protocol.RequestBackup;
-import com.network.messages.protocol.Yes;
+import com.network.messages.protocol.*;
 import com.network.storage.io.AsyncFileHandler;
 import com.network.storage.state.BackupState;
 import com.network.threads.ThreadPool;
@@ -66,15 +63,15 @@ public class ListenerVisitor extends DefaultListener {
         // TODO: Change folder name to file system
         String folder_name = "node_" + l.node.getId();
         File folder = new File(folder_name);
-        if(!folder.exists()) {
+        if (!folder.exists()) {
             folder.mkdirs();
         }
 
-        AsyncFileHandler.writeToFile(folder_name + "/" + backup.getName(), ByteBuffer.wrap(backup.getFileData()), (boolean success, int bytes_written) -> {
+        AsyncFileHandler.writeToFile(folder_name + "/" + backup.getId(), ByteBuffer.wrap(backup.getFileData()), (boolean success, int bytes_written) -> {
             try {
                 if (success) {
                     l.ci.sendMessage(new Yes());
-                    NetworkLogger.printLog(Level.INFO,String.format("%d bytes were written successfully!\n", bytes_written));
+                    NetworkLogger.printLog(Level.INFO, String.format("%d bytes were written successfully!\n", bytes_written));
                 } else {
                     l.ci.sendMessage(new No());
                     NetworkLogger.printLog(Level.WARNING, "File writing was not successful.");
@@ -83,6 +80,26 @@ public class ListenerVisitor extends DefaultListener {
                 NetworkLogger.printLog(Level.WARNING, "Error sending reply - " + e.getMessage());
             }
 
+        });
+    }
+
+    @Override
+    public void visit(RetrieveIfExists retrieveIfExists) throws IOException {
+        String folder_name = "node_" + l.node.getId();
+        AsyncFileHandler.readFile(folder_name + "/" + retrieveIfExists.getId(), (success, bytes_read, data) -> {
+            try {
+                if (!success) {
+                    l.ci.sendMessage(new No());
+                    return;
+                }
+
+                byte[] file_data = new byte[data.remaining()];
+                data.get(file_data, 0, file_data.length);
+
+                l.ci.sendMessage(new Retrieved(file_data));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 }

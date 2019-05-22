@@ -26,10 +26,6 @@ public class BackupProtocol {
                 return;
             }
 
-            if (data.position() > 0) {
-                data.rewind();
-            }
-
             final String file_name = new File(file_path).getName();
             byte[] file_data = new byte[data.remaining()];
             data.get(file_data, 0, file_data.length);
@@ -38,7 +34,7 @@ public class BackupProtocol {
             int n_successful = 0;
             HashSet<BasicInfo> hosts = new HashSet<>();
             for (int i = 0; i < ProtocolDefinitions.REPLICATION_DEGREE; ++i) {
-                BigInteger id = ProtocolDefinitions.fileToIdWithReplication(file_path, i);
+                BigInteger id = ProtocolDefinitions.fileToIdWithReplication(file_name, i);
 
                 try {
                     BasicInfo basicInfo = rmiInterface.lookup(id);

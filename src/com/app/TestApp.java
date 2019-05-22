@@ -33,6 +33,10 @@ public class TestApp {
                     latch.await();
                     break;
 
+                case "RESTORE":
+                    RestoreProtocol.start(rmiInterface, "tiny.txt");
+                    break;
+
                 default:
                     System.err.println("Unsupported operation: " + operation);
                     System.exit(-1);

@@ -51,13 +51,18 @@ public abstract class DefaultListener implements MessageVisitor {
     }
 
     @Override
-    public void visit(RetrieveIfExists retrieveIfExists) {
+    public void visit(RetrieveIfExists retrieveIfExists) throws IOException {
         this.defaultVisit(retrieveIfExists);
     }
 
     @Override
     public void visit(Yes yes) {
         this.defaultVisit(yes);
+    }
+
+    @Override
+    public void visit(Retrieved retrieved) {
+        this.defaultVisit(retrieved);
     }
 
     private void defaultVisit(Message msg) {

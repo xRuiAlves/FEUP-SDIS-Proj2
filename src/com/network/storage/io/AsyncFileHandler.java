@@ -22,7 +22,9 @@ public class AsyncFileHandler {
 
         @Override
         public void completed(Integer bytes_read, Object ignored) {
-            System.out.println("memes");
+            if (this.file_data.position() > 0) {
+                this.file_data.rewind();
+            }
             this.handler.done(true, bytes_read, this.file_data);
             try {
                 this.file_channel.close();
@@ -33,7 +35,6 @@ public class AsyncFileHandler {
 
         @Override
         public void failed(Throwable throwable, Object ignored) {
-            System.out.println("Failed in file reading:");
             throwable.printStackTrace();
 
             this.handler.done(false, 0, this.file_data);
@@ -67,7 +68,6 @@ public class AsyncFileHandler {
 
         @Override
         public void failed(Throwable throwable, Object ignored) {
-            System.out.println("Failed in file writing:");
             throwable.printStackTrace();
 
             this.handler.done(false, 0);
@@ -85,7 +85,6 @@ public class AsyncFileHandler {
         // The file channel must be passed to the completion handler, where it is closed.
         AsynchronousFileChannel file_channel = AsynchronousFileChannel.open(new File(path).toPath(), StandardOpenOption.READ);
         long file_size = file_channel.size();
-        System.out.println("The file to read has a size of " + file_size);
 
         final ByteBuffer file_buffer = ByteBuffer.allocate((int) file_size);
         file_channel.read(file_buffer, 0, null, new IOReadHandlerWrapper(completion_handler, file_buffer, file_channel));
@@ -100,7 +99,6 @@ public class AsyncFileHandler {
         // The file channel must be passed to the completion handler, where it is closed.
         AsynchronousFileChannel file_channel = AsynchronousFileChannel.open(new File(path).toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 
-        System.out.println("The buffer to write has a size of " + data_to_write.remaining());
 
         file_channel.write(data_to_write, start_position, null, new IOWriteHandlerWrapper(completion_handler, file_channel));
     }

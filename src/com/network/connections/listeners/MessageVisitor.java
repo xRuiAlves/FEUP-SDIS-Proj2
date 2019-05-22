@@ -23,8 +23,9 @@ public interface MessageVisitor {
 
     void visit(RequestBackup requestBackup) throws IOException;
 
-    void visit(RetrieveIfExists retrieveIfExists);
+    void visit(RetrieveIfExists retrieveIfExists) throws IOException;
 
     void visit(Yes yes);
 
+    void visit(Retrieved retrieved);
 }
