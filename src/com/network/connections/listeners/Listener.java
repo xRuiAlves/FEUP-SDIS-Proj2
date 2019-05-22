@@ -42,7 +42,6 @@ public class Listener implements Runnable {
                 return;
             } catch (Exception e) {
                 NetworkLogger.printLog(Level.WARNING, "Error receiving message - " + e.getMessage());
-                e.printStackTrace();
                 return;
             }
         }

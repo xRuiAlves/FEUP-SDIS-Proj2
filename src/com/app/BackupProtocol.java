@@ -14,6 +14,7 @@ import com.network.storage.io.AsyncFileHandler;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashSet;
 
 public class BackupProtocol {
 
@@ -25,17 +26,26 @@ public class BackupProtocol {
                 return;
             }
 
+            if (data.position() > 0) {
+                data.rewind();
+            }
+
             final String file_name = new File(file_path).getName();
             byte[] file_data = new byte[data.remaining()];
             data.get(file_data, 0, file_data.length);
 
+            System.out.println(file_data.length);
             int n_successful = 0;
+            HashSet<BasicInfo> hosts = new HashSet<>();
             for (int i = 0; i < ProtocolDefinitions.REPLICATION_DEGREE; ++i) {
                 BigInteger id = ProtocolDefinitions.fileToIdWithReplication(file_path, i);
 
-                // TODO filter for duplicate hostname:port combinations
                 try {
                     BasicInfo basicInfo = rmiInterface.lookup(id);
+                    if(hosts.contains(basicInfo)) {
+                        continue;
+                    }
+                    hosts.add(basicInfo);
                     System.out.println(basicInfo); // TODO Delete
 
                     if (attemptToSendFile(basicInfo, id, file_name, file_data)) {

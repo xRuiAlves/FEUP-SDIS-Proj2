@@ -21,6 +21,8 @@ public class StabilizeOperation implements Runnable{
 
     @Override
     public void run() {
+
+        // TODO: Check if successor failed
         try {
             if (this.node.getSuccessor() == null) {
 //                NetworkLogger.printLog(Level.INFO, "Stabilize not possible");

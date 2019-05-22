@@ -38,7 +38,6 @@ public class UpdateFingers implements Runnable {
 
         } catch (Exception e) {
             NetworkLogger.printLog(Level.WARNING, "Error asking for finger table upgrade - " + e.getMessage());
-            e.printStackTrace();
         }
 
     }
