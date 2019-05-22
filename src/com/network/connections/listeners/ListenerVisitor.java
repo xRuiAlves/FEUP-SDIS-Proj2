@@ -67,39 +67,50 @@ public class ListenerVisitor extends DefaultListener {
             folder.mkdirs();
         }
 
-        AsyncFileHandler.writeToFile(folder_name + "/" + backup.getId(), ByteBuffer.wrap(backup.getFileData()), (boolean success, int bytes_written) -> {
-            try {
-                if (success) {
-                    l.ci.sendMessage(new Yes());
-                    NetworkLogger.printLog(Level.INFO, String.format("%d bytes were written successfully!\n", bytes_written));
-                } else {
-                    l.ci.sendMessage(new No());
-                    NetworkLogger.printLog(Level.WARNING, "File writing was not successful.");
+        try {
+            AsyncFileHandler.writeToFile(folder_name + "/" + backup.getId(), ByteBuffer.wrap(backup.getFileData()), (boolean success, int bytes_written) -> {
+                try {
+                    if (success) {
+                        l.ci.sendMessage(new Yes());
+                        NetworkLogger.printLog(Level.INFO, String.format("%d bytes were written successfully!\n", bytes_written));
+                    } else {
+                        l.ci.sendMessage(new No());
+                        NetworkLogger.printLog(Level.WARNING, "File writing was not successful.");
+                    }
+                } catch (Exception e) {
+                    NetworkLogger.printLog(Level.WARNING, "Error sending reply - " + e.getMessage());
                 }
-            } catch (Exception e) {
-                NetworkLogger.printLog(Level.WARNING, "Error sending reply - " + e.getMessage());
-            }
 
-        });
+            });
+        } catch (IOException e) {
+            if (!l.ci.isClosed())
+                l.ci.sendMessage(new No());
+        }
     }
 
     @Override
     public void visit(RetrieveIfExists retrieveIfExists) throws IOException {
+
         String folder_name = "node_" + l.node.getId();
-        AsyncFileHandler.readFile(folder_name + "/" + retrieveIfExists.getId(), (success, bytes_read, data) -> {
-            try {
-                if (!success) {
-                    l.ci.sendMessage(new No());
-                    return;
+        try {
+            AsyncFileHandler.readFile(folder_name + "/" + retrieveIfExists.getId(), (success, bytes_read, data) -> {
+                try {
+                    if (!success) {
+                        l.ci.sendMessage(new No());
+                        return;
+                    }
+
+                    byte[] file_data = new byte[data.remaining()];
+                    data.get(file_data, 0, file_data.length);
+
+                    l.ci.sendMessage(new Retrieved(file_data));
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-                byte[] file_data = new byte[data.remaining()];
-                data.get(file_data, 0, file_data.length);
-
-                l.ci.sendMessage(new Retrieved(file_data));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+            });
+        } catch (IOException e) {
+            if (!l.ci.isClosed())
+                l.ci.sendMessage(new No());
+        }
     }
 }
