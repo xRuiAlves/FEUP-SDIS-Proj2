@@ -92,6 +92,10 @@ public class ListenerVisitor extends DefaultListener {
     public void visit(RetrieveIfExists retrieveIfExists) throws IOException {
 
         String folder_name = "node_" + l.node.getId();
+        File folder = new File(folder_name);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
         try {
             AsyncFileHandler.readFile(folder_name + "/" + retrieveIfExists.getId(), (success, bytes_read, data) -> {
                 try {

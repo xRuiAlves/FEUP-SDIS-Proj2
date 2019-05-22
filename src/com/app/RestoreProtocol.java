@@ -17,6 +17,7 @@ import java.math.BigInteger;
 public class RestoreProtocol {
 
     public static void start(NodeRMIInterface rmiInterface, String file_name) throws IOException {
+        ProtocolDefinitions.buildParentFolder();
         for (int i = 0; i < ProtocolDefinitions.REPLICATION_DEGREE; ++i) {
             BigInteger id = ProtocolDefinitions.fileToIdWithReplication(file_name, i);
 
@@ -43,7 +44,7 @@ public class RestoreProtocol {
             if (isResponseAffirmative(msg)) {
                 Retrieved retrieved = (Retrieved) msg;
                 successful = true;
-                RandomAccessFile file = new RandomAccessFile(file_name, "rw");
+                RandomAccessFile file = new RandomAccessFile(ProtocolDefinitions.ROOT_FOLDER + "/" + file_name, "rw");
                 file.write(retrieved.getFileData());
             } else {
                 System.out.printf("Failure in restoring up file %s - id %s!\n", file_name, id);

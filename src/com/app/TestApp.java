@@ -12,13 +12,14 @@ public class TestApp {
     public static final CountDownLatch latch = new CountDownLatch(1);
 
     public static void main(String[] args) {
-        if (args.length < 2) {
-            System.err.println("Usage: <peer-id> <operation>");
+        if (args.length < 3) {
+            System.err.println("Usage: <peer-id> <operation> <filename>");
             System.exit(-1);
         }
 
         String peer_p = args[0];
         String operation = args[1].toUpperCase();
+        String filename = args[2];
 
         try {
             Registry reg = LocateRegistry.getRegistry();
@@ -28,13 +29,14 @@ public class TestApp {
                     BasicInfo id = rmiInterface.lookup(BigInteger.ONE);
                     System.out.println(id);
                     break;
+
                 case "BACKUP":
-                    BackupProtocol.start(rmiInterface, "test_files/tiny.txt");
+                    BackupProtocol.start(rmiInterface, filename);
                     latch.await();
                     break;
 
                 case "RESTORE":
-                    RestoreProtocol.start(rmiInterface, "tiny.txt");
+                    RestoreProtocol.start(rmiInterface, filename);
                     break;
 
                 default:
