@@ -6,8 +6,11 @@ import com.network.rmi.NodeRMIInterface;
 import java.math.BigInteger;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.concurrent.CountDownLatch;
 
 public class TestApp {
+    public static final CountDownLatch latch = new CountDownLatch(1);
+
     public static void main(String[] args) {
         if (args.length < 2) {
             System.err.println("Usage: <peer-id> <operation>");
@@ -27,14 +30,13 @@ public class TestApp {
                     break;
                 case "BACKUP":
                     BackupProtocol.start(rmiInterface, "test_files/tiny.txt");
+                    latch.await();
                     break;
 
                 default:
                     System.err.println("Unsupported operation: " + operation);
                     System.exit(-1);
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }

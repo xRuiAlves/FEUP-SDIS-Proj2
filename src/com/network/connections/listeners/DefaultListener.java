@@ -5,6 +5,7 @@ import com.network.messages.Message;
 import com.network.messages.chord.*;
 import com.network.messages.protocol.*;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 
@@ -35,7 +36,7 @@ public abstract class DefaultListener implements MessageVisitor {
     }
 
     @Override
-    public void visit(Backup backup) {
+    public void visit(Backup backup) throws IOException {
         this.defaultVisit(backup);
     }
 
@@ -45,7 +46,7 @@ public abstract class DefaultListener implements MessageVisitor {
     }
 
     @Override
-    public void visit(RequestBackup requestBackup) {
+    public void visit(RequestBackup requestBackup) throws IOException {
         this.defaultVisit(requestBackup);
     }
 

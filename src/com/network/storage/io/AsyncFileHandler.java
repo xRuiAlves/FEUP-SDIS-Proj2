@@ -22,6 +22,7 @@ public class AsyncFileHandler {
 
         @Override
         public void completed(Integer bytes_read, Object ignored) {
+            System.out.println("memes");
             this.handler.done(true, bytes_read, this.file_data);
             try {
                 this.file_channel.close();

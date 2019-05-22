@@ -1,31 +1,17 @@
 package com.network.messages.protocol;
 
-import com.network.messages.Message;
 import com.network.connections.listeners.MessageVisitor;
-
-import java.math.BigInteger;
+import com.network.messages.Message;
 
 public class RequestBackup extends Message {
-    private final float size;
-    private final BigInteger id;
-    private final String name;
+    private final long size;
 
-    public RequestBackup(float size, BigInteger id, String name) {
+    public RequestBackup(long size) {
         this.size = size;
-        this.id = id;
-        this.name = name;
     }
 
-    public float getSize() {
+    public long getSize() {
         return size;
-    }
-
-    public BigInteger getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public boolean accept(MessageVisitor mv) throws Exception {
