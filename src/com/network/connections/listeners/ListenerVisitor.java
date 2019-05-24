@@ -7,6 +7,7 @@ import com.network.messages.chord.*;
 import com.network.messages.protocol.*;
 import com.network.storage.io.AsyncFileHandler;
 import com.network.storage.state.BackupState;
+import com.network.storage.state.FileBackupInfo;
 import com.network.threads.ThreadPool;
 import com.network.threads.operations.SendMessage;
 
@@ -67,6 +68,10 @@ public class ListenerVisitor extends DefaultListener {
             folder.mkdirs();
         }
 
+        if (!BackupState.getInstance().registerBackup(new FileBackupInfo(backup.getName(), backup.getFileData().length, backup.getId()))) {
+            l.ci.sendMessage(new No());
+        }
+
         try {
             AsyncFileHandler.writeToFile(folder_name + "/" + backup.getId(), ByteBuffer.wrap(backup.getFileData()), (boolean success, int bytes_written) -> {
                 try {
@@ -74,6 +79,7 @@ public class ListenerVisitor extends DefaultListener {
                         l.ci.sendMessage(new Yes());
                         NetworkLogger.printLog(Level.INFO, String.format("%d bytes were written successfully!\n", bytes_written));
                     } else {
+                        BackupState.getInstance().unregisterBackup(backup.getId());
                         l.ci.sendMessage(new No());
                         NetworkLogger.printLog(Level.WARNING, "File writing was not successful.");
                     }
@@ -83,6 +89,7 @@ public class ListenerVisitor extends DefaultListener {
 
             });
         } catch (IOException e) {
+            BackupState.getInstance().unregisterBackup(backup.getId());
             l.ci.sendMessage(new No());
         }
     }
@@ -95,6 +102,11 @@ public class ListenerVisitor extends DefaultListener {
         if (!folder.exists()) {
             folder.mkdirs();
         }
+
+        if (!BackupState.getInstance().isBackedUp(retrieveIfExists.getId())) {
+            l.ci.sendMessage(new No());
+        }
+
         try {
             AsyncFileHandler.readFile(folder_name + "/" + retrieveIfExists.getId(), (success, bytes_read, data) -> {
                 try {

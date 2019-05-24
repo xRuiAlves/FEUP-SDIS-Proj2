@@ -20,18 +20,19 @@ public class BackupState {
 
     private static final long MAX_DISK_SIZE_KBS = 1000000;
 
-    private long occupied_space_bytes = 0;
+    private volatile long occupied_space_bytes = 0;
 
-    public void registerBackup(FileBackupInfo info) {
+    public boolean registerBackup(FileBackupInfo info) {
         if (!this.canStore(info.getSize())) {
             NetworkLogger.printLog(Level.SEVERE, "Space Limit Reached! Unable to store file!");
-            return;
+            return false;
         }
 
         this.updateOccupied(info.getSize());
         this.backups.put(info.getId(), info);
 
         NetworkLogger.printLog(Level.INFO, String.format("Backed up file with name %s and id %s", info.getName(), info.getId()));
+        return true;
     }
 
     public void unregisterBackup(BigInteger id) {
