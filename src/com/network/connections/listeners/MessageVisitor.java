@@ -28,4 +28,6 @@ public interface MessageVisitor {
     void visit(Yes yes);
 
     void visit(Retrieved retrieved);
+
+    void visit(Delete delete);
 }

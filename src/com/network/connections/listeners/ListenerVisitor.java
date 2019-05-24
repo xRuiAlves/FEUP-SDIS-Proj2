@@ -62,7 +62,7 @@ public class ListenerVisitor extends DefaultListener {
     @Override
     public void visit(Backup backup) throws IOException {
         // TODO: Change folder name to file system
-        String folder_name = "node_" + l.node.getId();
+        String folder_name = l.node.getBaseFolderName();
         File folder = new File(folder_name);
         if (!folder.exists()) {
             folder.mkdirs();
@@ -96,8 +96,7 @@ public class ListenerVisitor extends DefaultListener {
 
     @Override
     public void visit(RetrieveIfExists retrieveIfExists) throws IOException {
-
-        String folder_name = "node_" + l.node.getId();
+        String folder_name = l.node.getBaseFolderName();
         File folder = new File(folder_name);
         if (!folder.exists()) {
             folder.mkdirs();
@@ -125,6 +124,21 @@ public class ListenerVisitor extends DefaultListener {
             });
         } catch (IOException e) {
             l.ci.sendMessage(new No());
+        }
+    }
+
+    @Override
+    public void visit(Delete delete) {
+        String folder_name = l.node.getBaseFolderName();
+        if (BackupState.getInstance().isBackedUp(delete.getId())) {
+            File f = new File(folder_name + "/" + delete.getId());
+            if (f.delete()) {
+                NetworkLogger.printLog(Level.INFO, String.format("Deleted file with id %s successfully", delete.getId()));
+            } else {
+                NetworkLogger.printLog(Level.INFO, String.format("File with id %s could not be deleted", delete.getId()));
+            }
+        } else {
+            NetworkLogger.printLog(Level.INFO, String.format("Received Delete for File with id %s that is not backed up", delete.getId()));
         }
     }
 }

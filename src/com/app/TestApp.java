@@ -39,6 +39,10 @@ public class TestApp {
                     RestoreProtocol.start(rmiInterface, filename);
                     break;
 
+                case "DELETE":
+                    DeleteProtocol.start(rmiInterface, filename);
+                    break;
+
                 default:
                     System.err.println("Unsupported operation: " + operation);
                     System.exit(-1);

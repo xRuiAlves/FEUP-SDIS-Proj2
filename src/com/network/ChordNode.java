@@ -33,6 +33,8 @@ import java.util.logging.Level;
 public class ChordNode {
 
     public final static Integer m = 64;
+
+    private static final String FOLDER_PREFIX = "node_";
     private final Server server;
     private final BigInteger id;
 
@@ -114,6 +116,10 @@ public class ChordNode {
 
     public BigInteger getId() {
         return id;
+    }
+
+    public String getBaseFolderName() {
+        return FOLDER_PREFIX + id;
     }
 
     public void setSuccessor(NodeInfo node) {

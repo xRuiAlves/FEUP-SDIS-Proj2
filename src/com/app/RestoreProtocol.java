@@ -4,7 +4,6 @@ import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.JSSETCPConnection;
 import com.network.info.BasicInfo;
 import com.network.messages.Message;
-import com.network.messages.protocol.Backup;
 import com.network.messages.protocol.No;
 import com.network.messages.protocol.RetrieveIfExists;
 import com.network.messages.protocol.Retrieved;
@@ -16,7 +15,7 @@ import java.math.BigInteger;
 
 public class RestoreProtocol {
 
-    public static void start(NodeRMIInterface rmiInterface, String file_name) throws IOException {
+    public static void start(NodeRMIInterface rmiInterface, String file_name) {
         ProtocolDefinitions.buildParentFolder();
         for (int i = 0; i < ProtocolDefinitions.REPLICATION_DEGREE; ++i) {
             BigInteger id = ProtocolDefinitions.fileToIdWithReplication(file_name, i);

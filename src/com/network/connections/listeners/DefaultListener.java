@@ -56,6 +56,11 @@ public abstract class DefaultListener implements MessageVisitor {
     }
 
     @Override
+    public void visit(Delete delete) {
+        this.defaultVisit(delete);
+    }
+
+    @Override
     public void visit(Yes yes) {
         this.defaultVisit(yes);
     }
