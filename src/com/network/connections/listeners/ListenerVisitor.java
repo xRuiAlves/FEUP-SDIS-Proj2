@@ -133,6 +133,7 @@ public class ListenerVisitor extends DefaultListener {
         if (BackupState.getInstance().isBackedUp(delete.getId())) {
             File f = new File(folder_name + "/" + delete.getId());
             if (f.delete()) {
+                BackupState.getInstance().unregisterBackup(delete.getId());
                 NetworkLogger.printLog(Level.INFO, String.format("Deleted file with id %s successfully", delete.getId()));
             } else {
                 NetworkLogger.printLog(Level.INFO, String.format("File with id %s could not be deleted", delete.getId()));
