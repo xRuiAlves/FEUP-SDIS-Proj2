@@ -30,10 +30,14 @@ public class LogFormatter extends Formatter {
     @Override
     public String format(LogRecord record) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(this.getColorByLevel(record.getLevel()));
         stringBuilder.append(dateFormat.format(new Date(record.getMillis())));
         stringBuilder.append(" - [").append(this.nodeId).append("]");
-        stringBuilder.append(" - [").append(record.getLevel().getName()).append("] - ");
+        stringBuilder.append(" - ");
+
+        stringBuilder.append(this.getColorByLevel(record.getLevel()));
+        stringBuilder.append("[").append(record.getLevel().getName()).append("]");
+        stringBuilder.append(ANSI_RESET).append(" - ");
+
         Object[] parameters = record.getParameters();
         if (parameters != null) {
             stringBuilder.append("[");
@@ -43,7 +47,7 @@ public class LogFormatter extends Formatter {
                     stringBuilder.append(", ");
                 }
             }
-            stringBuilder.append("] - ").append(ANSI_RESET);
+            stringBuilder.append("] - ");
         }
 
         stringBuilder.append(record.getMessage()).append("\n");

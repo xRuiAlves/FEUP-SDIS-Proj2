@@ -129,7 +129,7 @@ public class ChordNode {
                 this.successor = node;
                 NetworkLogger.printLog(Level.INFO, "Changed successor - " + this.successor);
             } catch (IOException e) {
-                NetworkLogger.printLog(Level.WARNING, "Failed connection to successor");
+                NetworkLogger.printLog(Level.WARNING, "Failed connection to successor - " + e.getMessage());
             }
         }
         if (this.successor != null) {
