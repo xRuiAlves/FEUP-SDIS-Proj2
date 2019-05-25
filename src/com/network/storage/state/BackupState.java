@@ -3,6 +3,7 @@ package com.network.storage.state;
 import com.network.log.NetworkLogger;
 
 import java.math.BigInteger;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -52,5 +53,13 @@ public class BackupState {
 
     private synchronized void updateOccupied(long diff) {
         occupied_space_bytes += diff;
+    }
+
+    public Enumeration<BigInteger> getIds() {
+        return this.backups.keys();
+    }
+
+    public FileBackupInfo get(BigInteger id) {
+        return this.backups.getOrDefault(id, null);
     }
 }

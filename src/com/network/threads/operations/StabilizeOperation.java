@@ -51,6 +51,7 @@ public class StabilizeOperation implements Runnable{
 
         } catch (Exception e) {
             NetworkLogger.printLog(Level.WARNING, "Error asking its successor for its predecessor");
+            e.printStackTrace();
         }
 
     }

@@ -1,30 +1,29 @@
 package com.network;
 
 import com.network.connections.ConnectionHandler;
-import com.network.connections.listeners.Listener;
 import com.network.connections.client.ConnectionInterface;
 import com.network.connections.client.JSSETCPConnection;
+import com.network.connections.listeners.Listener;
 import com.network.connections.manager.ConnectionManager;
 import com.network.connections.server.Server;
 import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
 import com.network.info.NullInfo;
 import com.network.log.NetworkLogger;
-import com.network.messages.chord.LookUp;
 import com.network.messages.Message;
+import com.network.messages.chord.LookUp;
 import com.network.messages.chord.Notify;
+import com.network.storage.state.BackupState;
 import com.network.subscriptions.FingerTableUpdate;
 import com.network.subscriptions.JoinHandler;
 import com.network.threads.ThreadPool;
-import com.network.threads.operations.LookUpOperation;
-import com.network.threads.operations.SendMessage;
-import com.network.threads.operations.StabilizeOperation;
-import com.network.threads.operations.UpdateFingers;
+import com.network.threads.operations.*;
 import com.network.utils.IdEncoder;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
@@ -40,20 +39,20 @@ public class ChordNode {
 
     private InfoInterface predecessor;
     private NodeInfo successor;
-    private ConcurrentHashMap<BigInteger, InfoInterface> fingerTable;
-    private ConcurrentLinkedDeque<BigInteger> fingerTableOrder;
-    private ConnectionManager manager;
+    private ConcurrentHashMap<BigInteger, InfoInterface> fingerTable = new ConcurrentHashMap<>();
+    private ConcurrentLinkedDeque<BigInteger> fingerTableOrder = new ConcurrentLinkedDeque<>();
+    private ConnectionManager manager = new ConnectionManager();
+    private FileRedistribution fileRedistribution;
 
     public ChordNode() throws IOException {
-        this.manager = new ConnectionManager();
-        this.fingerTable = new ConcurrentHashMap<>();
-        this.fingerTableOrder = new ConcurrentLinkedDeque<>();
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
         this.predecessor = new NullInfo();
         this.successor = new NodeInfo(this, this.id, this.server.getServerConnection().getIp(), this.server.getServerConnection().getPort());
         ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 1000, TimeUnit.MILLISECONDS);
+        fileRedistribution = new FileRedistribution(this);
+        ThreadPool.getInstance().scheduleAtFixedRate(fileRedistribution, 0, 1000, TimeUnit.MILLISECONDS);
 
         NetworkLogger.setNodeId(this.id.toString());
         NetworkLogger.printLog(Level.INFO, "Server connection open: " + server.getServerConnection().getIp().toString() + ":" + server.getServerConnection().getPort());
@@ -63,14 +62,13 @@ public class ChordNode {
     }
 
     public ChordNode(InetAddress host, Integer port) throws IOException {
-        this.manager = new ConnectionManager();
-        this.fingerTable = new ConcurrentHashMap<>();
-        this.fingerTableOrder = new ConcurrentLinkedDeque<>();
         this.server = new Server(this);
         ThreadPool.getInstance().submit(this.server);
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
         this.predecessor = new NullInfo();
         ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 1000, TimeUnit.MILLISECONDS);
+        fileRedistribution = new FileRedistribution(this);
+        ThreadPool.getInstance().scheduleAtFixedRate(fileRedistribution, 0, 1000, TimeUnit.MILLISECONDS);
 
         NetworkLogger.setNodeId(this.id.toString());
         NetworkLogger.printLog(Level.INFO, "Server connection open: " + server.getServerConnection().getIp().toString() + ":" + server.getServerConnection().getPort());
@@ -123,7 +121,7 @@ public class ChordNode {
     }
 
     public void setSuccessor(NodeInfo node) {
-        if (this.successor == null || this.id.equals(this.successor.getId()) || node.inInterval(this.id, this.successor.getId())) {
+        if (this.successor == null || ((this.id.equals(this.successor.getId()) || node.inInterval(this.id, this.successor.getId())) && !this.successor.getId().equals(node.getId()))) {
             try {
                 node.startConnection();
                 this.successor = node;
@@ -148,9 +146,24 @@ public class ChordNode {
     }
 
     public void setPredecessor(NodeInfo predecessor) {
-        if (this.predecessor instanceof NullInfo  || (predecessor.inInterval(this.predecessor.getId(), this.id))) {
-            this.predecessor = predecessor;
-            NetworkLogger.printLog(Level.INFO, "Predecessor updated - " + predecessor);
+        if (this.predecessor instanceof NullInfo || (predecessor.inInterval(this.predecessor.getId(), this.id))) {
+
+            try {
+                // TODO: ?? Replace start connection with the existing connection ??
+                predecessor.startConnection();
+                this.predecessor = predecessor;
+                ThreadPool.getInstance().submit(() -> {
+                    Enumeration<BigInteger> ids = BackupState.getInstance().getIds();
+                    while (ids.hasMoreElements()) {
+                        BigInteger id = ids.nextElement();
+                        this.getFileRedistribution().addIdToCheck(id);
+
+                    }
+                });
+                NetworkLogger.printLog(Level.INFO, "Changed predecessor - " + this.predecessor);
+            } catch (IOException e) {
+                NetworkLogger.printLog(Level.WARNING, "Failed connection to predecessor - " + e.getMessage());
+            }
         }
     }
 
@@ -164,5 +177,9 @@ public class ChordNode {
 
     public ConnectionManager getManager() {
         return manager;
+    }
+
+    public FileRedistribution getFileRedistribution() {
+        return fileRedistribution;
     }
 }

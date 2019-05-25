@@ -71,6 +71,6 @@ public abstract class DefaultListener implements MessageVisitor {
     }
 
     private void defaultVisit(Message msg) {
-        NetworkLogger.printLog(Level.SEVERE, "Message type not supported");
+        NetworkLogger.printLog(Level.WARNING, "Message type not supported");
     }
 }

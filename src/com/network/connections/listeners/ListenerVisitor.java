@@ -61,7 +61,6 @@ public class ListenerVisitor extends DefaultListener {
 
     @Override
     public void visit(Backup backup) throws IOException {
-        // TODO: Change folder name to file system
         String folder_name = l.node.getBaseFolderName();
         File folder = new File(folder_name);
         if (!folder.exists()) {
@@ -76,6 +75,7 @@ public class ListenerVisitor extends DefaultListener {
             AsyncFileHandler.writeToFile(folder_name + "/" + backup.getId(), ByteBuffer.wrap(backup.getFileData()), (boolean success, int bytes_written) -> {
                 try {
                     if (success) {
+                        l.node.getFileRedistribution().addIdToCheck(backup.getId());
                         l.ci.sendMessage(new Yes());
                         NetworkLogger.printLog(Level.INFO, String.format("%d bytes were written successfully!\n", bytes_written));
                     } else {

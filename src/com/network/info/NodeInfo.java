@@ -3,6 +3,7 @@ package com.network.info;
 import com.network.ChordNode;
 import com.network.connections.listeners.Listener;
 import com.network.connections.client.JSSETCPConnection;
+import com.network.log.NetworkLogger;
 
 import java.io.IOException;
 import java.math.BigInteger;
