@@ -9,13 +9,16 @@ import com.network.messages.protocol.RetrieveIfExists;
 import com.network.messages.protocol.Retrieved;
 import com.network.rmi.NodeRMIInterface;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
 
 public class RestoreProtocol {
 
-    public static void start(NodeRMIInterface rmiInterface, String file_name) {
+    public static void start(NodeRMIInterface rmiInterface, String file_path) {
+        final String file_name = new File(file_path).getName();
+
         ProtocolDefinitions.buildParentFolder();
         for (int i = 0; i < ProtocolDefinitions.REPLICATION_DEGREE; ++i) {
             BigInteger id = ProtocolDefinitions.fileToIdWithReplication(file_name, i);
