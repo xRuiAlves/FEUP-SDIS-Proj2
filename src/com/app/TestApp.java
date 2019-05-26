@@ -14,6 +14,7 @@ public class TestApp {
     public static void main(String[] args) {
         if (args.length < 3) {
             System.err.println("Usage: <peer-id> <operation> <filename>");
+            System.err.println("Supported operations: LOOKUP, BACKUP, RESTORE, DELETE");
             System.exit(-1);
         }
 
@@ -45,6 +46,7 @@ public class TestApp {
 
                 default:
                     System.err.println("Unsupported operation: " + operation);
+                    System.err.println("Supported operations: LOOKUP, BACKUP, RESTORE, DELETE");
                     System.exit(-1);
             }
         } catch (Exception e) {
