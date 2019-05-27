@@ -4,6 +4,7 @@ import com.network.ChordNode;
 import com.network.connections.listeners.Listener;
 import com.network.connections.client.JSSETCPConnection;
 import com.network.utils.IpFinder;
+import com.network.utils.PortManager;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -22,9 +23,7 @@ public class JSSEServerConnection implements ServerConnectionInterface {
         this.ip = IpFinder.findIp();
         SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 
-        // TODO: CHANGE WAY OF GETTING PORT
-        Random rand = new Random();
-        int port = rand.nextInt(50000) + 10000;
+        final int port = PortManager.getAvailablePort();
 
         this.serverSocket = (SSLServerSocket) factory.createServerSocket(port);
         this.serverSocket.setNeedClientAuth(true);
