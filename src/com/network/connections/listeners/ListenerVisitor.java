@@ -77,7 +77,7 @@ public class ListenerVisitor extends DefaultListener {
                     if (success) {
                         l.node.getFileRedistribution().addIdToCheck(backup.getId());
                         l.ci.sendMessage(new Yes());
-                        NetworkLogger.printLog(Level.INFO, String.format("%d bytes were written successfully!\n", bytes_written));
+//                        NetworkLogger.printLog(Level.INFO, String.format("%d bytes were written successfully!", bytes_written));
                     } else {
                         BackupState.getInstance().unregisterBackup(backup.getId());
                         l.ci.sendMessage(new No());

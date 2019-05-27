@@ -41,7 +41,7 @@ public class FileRedistribution implements Runnable {
         while (iter.hasNext()) {
             final BigInteger id = iter.next();
 
-            if (BackupState.getInstance().isBackedUp(id) && this.node.getPredecessor() instanceof NodeInfo && this.needsRedistribution(this.node.getPredecessor().getId(), id)) {
+            if (BackupState.getInstance().isBackedUp(id) && this.node.getPredecessor() instanceof NodeInfo && this.needsRedistribution(id)) {
                 NetworkLogger.printLog(Level.WARNING, "File with id " + id + " belongs to the predecessor");
                 final NodeInfo predecessor = (NodeInfo) this.node.getPredecessor();
                 final FileBackupInfo info = BackupState.getInstance().get(id);
@@ -81,9 +81,10 @@ public class FileRedistribution implements Runnable {
         }
     }
 
-    private boolean needsRedistribution(BigInteger predId, BigInteger fileId) {
+    private boolean needsRedistribution(BigInteger fileId) {
         BigInteger currId = this.node.getId();
-        return (predId.compareTo(currId) < 0 && predId.compareTo(fileId) <= 0)
-                || (predId.compareTo(currId) > 0 && predId.compareTo(fileId) <= 0 && currId.compareTo(fileId) > 0);
+        BigInteger predId = this.node.getPredecessor().getId();
+        return (predId.compareTo(currId) < 0 && predId.compareTo(fileId) >= 0)
+                || (predId.compareTo(currId) > 0 && predId.compareTo(fileId) >= 0 && currId.compareTo(fileId) < 0);
     }
 }
