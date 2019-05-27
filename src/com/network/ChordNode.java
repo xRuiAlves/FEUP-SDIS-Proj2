@@ -6,6 +6,7 @@ import com.network.connections.client.JSSETCPConnection;
 import com.network.connections.listeners.Listener;
 import com.network.connections.manager.ConnectionManager;
 import com.network.connections.server.Server;
+import com.network.info.BasicInfo;
 import com.network.info.InfoInterface;
 import com.network.info.NodeInfo;
 import com.network.info.NullInfo;
@@ -26,12 +27,14 @@ import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class ChordNode {
 
     public final static Integer m = 64;
+    public final static Integer fault = 3;
 
     private static final String FOLDER_PREFIX = "node_";
     private final Server server;
@@ -41,6 +44,7 @@ public class ChordNode {
     private NodeInfo successor;
     private ConcurrentHashMap<BigInteger, InfoInterface> fingerTable = new ConcurrentHashMap<>();
     private ConcurrentLinkedDeque<BigInteger> fingerTableOrder = new ConcurrentLinkedDeque<>();
+    private ConcurrentLinkedQueue<BasicInfo> successors = new ConcurrentLinkedQueue<>();
     private ConnectionManager manager = new ConnectionManager();
     private FileRedistribution fileRedistribution;
 
@@ -50,7 +54,8 @@ public class ChordNode {
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
         this.predecessor = new NullInfo();
         this.successor = new NodeInfo(this, this.id, this.server.getServerConnection().getIp(), this.server.getServerConnection().getPort());
-        ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 1000, TimeUnit.MILLISECONDS);
+        ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 500, TimeUnit.MILLISECONDS);
+        ThreadPool.getInstance().scheduleAtFixedRate(new CheckPredecessor(this), 0, 500, TimeUnit.MILLISECONDS);
         fileRedistribution = new FileRedistribution(this);
         ThreadPool.getInstance().scheduleAtFixedRate(fileRedistribution, 0, 1000, TimeUnit.MILLISECONDS);
 
@@ -67,6 +72,7 @@ public class ChordNode {
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
         this.predecessor = new NullInfo();
         ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 1000, TimeUnit.MILLISECONDS);
+        ThreadPool.getInstance().scheduleAtFixedRate(new CheckPredecessor(this), 0, 500, TimeUnit.MILLISECONDS);
         fileRedistribution = new FileRedistribution(this);
         ThreadPool.getInstance().scheduleAtFixedRate(fileRedistribution, 0, 1000, TimeUnit.MILLISECONDS);
 
@@ -120,20 +126,53 @@ public class ChordNode {
         return FOLDER_PREFIX + id;
     }
 
-    public void setSuccessor(NodeInfo node) {
+    public void setSuccessor(NodeInfo node, ConcurrentLinkedQueue<BasicInfo> sucessors) {
         if (this.successor == null || ((this.id.equals(this.successor.getId()) || node.inInterval(this.id, this.successor.getId())) && !this.successor.getId().equals(node.getId()))) {
             try {
+                NetworkLogger.printLog(Level.INFO, "Predecessor has id " + node.getId());
                 node.startConnection();
                 this.successor = node;
+                this.successors = sucessors;
                 NetworkLogger.printLog(Level.INFO, "Changed successor - " + this.successor);
             } catch (IOException e) {
                 NetworkLogger.printLog(Level.WARNING, "Failed connection to successor - " + e.getMessage());
             }
         }
+
         if (this.successor != null) {
+            if (this.id.equals(node.getId())) {
+                this.successors = sucessors;
+            }
+
             ConnectionInterface connection = this.successor.getListener().getInternal();
             if (connection != null)
                 ThreadPool.getInstance().submit(new SendMessage(new Notify(this, this.id), connection));
+        }
+    }
+
+    public void advanceSuccessor() {
+
+        try {
+            BasicInfo info = this.successors.poll();
+            if (info == null) {
+                NetworkLogger.printLog(Level.SEVERE, "Couldn't determine successor - exiting");
+                System.exit(-2);
+            }
+
+            NetworkLogger.printLog(Level.INFO, "Moving to next peer with " + info.getIp() + ":" + info.getPort());
+            BigInteger succId = IdEncoder.encode(info.getIp(), info.getPort());
+            final NodeInfo newSucc = new NodeInfo(this, succId, info.getIp(), info.getPort());
+            if (succId.equals(id)) {
+                this.predecessor = new NullInfo();
+                this.successors = new ConcurrentLinkedQueue<>();
+            } else {
+                newSucc.startConnection();
+            }
+            this.successor = newSucc;
+            NetworkLogger.printLog(Level.WARNING, "Changed to the next successor - " + this.successor);
+        } catch (IOException e) {
+            NetworkLogger.printLog(Level.WARNING, "Failed connection to next successor - " + e.getMessage());
+            this.advanceSuccessor();
         }
     }
 
@@ -149,7 +188,6 @@ public class ChordNode {
         if (this.predecessor instanceof NullInfo || (predecessor.inInterval(this.predecessor.getId(), this.id))) {
 
             try {
-                // TODO: ?? Replace start connection with the existing connection ??
                 predecessor.startConnection();
                 this.predecessor = predecessor;
                 ThreadPool.getInstance().submit(() -> {
@@ -181,5 +219,14 @@ public class ChordNode {
 
     public FileRedistribution getFileRedistribution() {
         return fileRedistribution;
+    }
+
+    public ConcurrentLinkedQueue<BasicInfo> getSuccessors() {
+        return successors;
+    }
+
+
+    public void resetPredecessor() {
+        this.predecessor = new NullInfo();
     }
 }
