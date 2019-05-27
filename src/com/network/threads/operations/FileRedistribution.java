@@ -84,7 +84,7 @@ public class FileRedistribution implements Runnable {
     private boolean needsRedistribution(BigInteger fileId) {
         BigInteger currId = this.node.getId();
         BigInteger predId = this.node.getPredecessor().getId();
-        return (predId.compareTo(currId) < 0 && predId.compareTo(fileId) >= 0)
+        return (predId.compareTo(currId) < 0 && (predId.compareTo(fileId) >= 0 || fileId.compareTo(currId) > 0))
                 || (predId.compareTo(currId) > 0 && predId.compareTo(fileId) >= 0 && currId.compareTo(fileId) < 0);
     }
 }
