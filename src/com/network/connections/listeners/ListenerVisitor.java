@@ -1,6 +1,8 @@
 package com.network.connections.listeners;
 
+import com.network.ChordNode;
 import com.network.connections.ConnectionHandler;
+import com.network.info.BasicInfo;
 import com.network.info.NodeInfo;
 import com.network.log.NetworkLogger;
 import com.network.messages.chord.*;
@@ -15,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 
 public class ListenerVisitor extends DefaultListener {
@@ -31,8 +34,18 @@ public class ListenerVisitor extends DefaultListener {
 
     @Override
     public void visit(GetPredecessor getPredecessor) throws UnknownHostException {
-        // The same socket is live until the node that asks closes it
-        ThreadPool.getInstance().submit(new SendMessage(new Predecessor(l.node), l.ci));
+        ConcurrentLinkedQueue<BasicInfo> successors = new ConcurrentLinkedQueue<>();
+        successors.add(new BasicInfo(l.node.getSuccessor().getIp(), l.node.getSuccessor().getPort()));
+
+        ConcurrentLinkedQueue<BasicInfo> nodeSuccessors = l.node.getSuccessors();
+        for (BasicInfo info:  nodeSuccessors) {
+            if (successors.size() >= ChordNode.fault) {
+                break;
+            }
+
+            successors.add(info);
+        }
+        ThreadPool.getInstance().submit(new SendMessage(new Predecessor(l.node, successors), l.ci));
     }
 
     @Override
@@ -47,7 +60,7 @@ public class ListenerVisitor extends DefaultListener {
 
     @Override
     public void visit(Predecessor predecessor) {
-        l.node.setSuccessor(new NodeInfo(l.node, predecessor.getId(), predecessor.getHostname(), predecessor.getPort()));
+        l.node.setSuccessor(new NodeInfo(l.node, predecessor.getId(), predecessor.getHostname(), predecessor.getPort()), predecessor.getSuccessors());
     }
 
     @Override

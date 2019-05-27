@@ -5,6 +5,7 @@ import com.network.log.NetworkLogger;
 import com.network.messages.chord.ChordMessage;
 import com.network.ChordNode;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 
 public class JoinHandler implements SubscriptionHandlerInterface {
@@ -20,7 +21,7 @@ public class JoinHandler implements SubscriptionHandlerInterface {
             NetworkLogger.printLog(Level.SEVERE, "Node id already taken");
             System.exit(-5);
         }
-        node.setSuccessor(new NodeInfo(node, msg.getSenderId(), msg.getHostname(), msg.getPort()));
+        node.setSuccessor(new NodeInfo(node, msg.getSenderId(), msg.getHostname(), msg.getPort()), new ConcurrentLinkedQueue<>());
     }
 
     @Override
