@@ -170,11 +170,13 @@ public class ListenerVisitor extends DefaultListener {
     @Override
     public void visit(Reclaimed reclaimed) throws IOException {
 
-        if (l.node.getId().equals(reclaimed.getSenderId())) {
+        if (l.node.getId().equals(reclaimed.getSenderId()) || reclaimed.alreadyVisited(l.node.getId())) {
             NetworkLogger.printLog(Level.SEVERE, "Failed to save reclaimed file - " + reclaimed.getId());
             return;
         }
 
+        reclaimed.visited(l.node.getId());
+        
         String folder_name = l.node.getBaseFolderName();
         File folder = new File(folder_name);
         if (!folder.exists()) {
