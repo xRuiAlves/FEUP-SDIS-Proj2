@@ -5,6 +5,7 @@ import com.network.connections.client.JSSETCPConnection;
 import com.network.info.BasicInfo;
 import com.network.messages.Message;
 import com.network.messages.protocol.No;
+import com.network.messages.protocol.Redirect;
 import com.network.messages.protocol.RetrieveIfExists;
 import com.network.messages.protocol.Retrieved;
 import com.network.rmi.NodeRMIInterface;
@@ -43,6 +44,11 @@ public class RestoreProtocol {
         boolean successful = false;
         try {
             Message msg = connection.getMessage();
+            if (msg instanceof Redirect) {
+                connection.close();
+                return attemptRestore(new BasicInfo(((Redirect) msg).getHostname(), ((Redirect) msg).getPort()), id, file_name);
+            }
+
             if (isResponseAffirmative(msg)) {
                 Retrieved retrieved = (Retrieved) msg;
                 successful = true;

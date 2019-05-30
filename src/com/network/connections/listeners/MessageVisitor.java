@@ -36,4 +36,6 @@ public interface MessageVisitor {
     void visit(SaveReclaimed saveReclaimed);
 
     void visit(RemoteSave remoteSave);
+
+    void visit(Redirect redirect);
 }

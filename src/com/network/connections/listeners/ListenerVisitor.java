@@ -124,6 +124,12 @@ public class ListenerVisitor extends DefaultListener {
             return;
         }
 
+        FileBackupInfo info = BackupState.getInstance().get(retrieveIfExists.getId());
+        if (info instanceof RemoteBackupInfo) {
+            RemoteBackupInfo remote = (RemoteBackupInfo) info;
+            l.ci.sendMessage(new Redirect(remote.getHostname(), remote.getPort()));
+        }
+
         try {
             AsyncFileHandler.readFile(folder_name + "/" + retrieveIfExists.getId(), (success, bytes_read, data) -> {
                 try {
