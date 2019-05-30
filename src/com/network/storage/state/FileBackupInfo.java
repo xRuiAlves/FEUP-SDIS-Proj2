@@ -6,6 +6,7 @@ import java.util.Objects;
 public class FileBackupInfo {
     private final String name;
     private final long size;
+    private final boolean redistributable;
 
     private final BigInteger id;
 
@@ -13,6 +14,14 @@ public class FileBackupInfo {
         this.name = name;
         this.size = size;
         this.id = id;
+        this.redistributable = true;
+    }
+
+    public FileBackupInfo(String name, long size, BigInteger id, boolean redistributable) {
+        this.name = name;
+        this.size = size;
+        this.id = id;
+        this.redistributable = redistributable;
     }
 
     @Override
@@ -44,5 +53,9 @@ public class FileBackupInfo {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isRedistributable() {
+        return redistributable;
     }
 }

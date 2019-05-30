@@ -70,6 +70,21 @@ public abstract class DefaultListener implements MessageVisitor {
         this.defaultVisit(retrieved);
     }
 
+    @Override
+    public void visit(Reclaimed reclaimed) throws IOException {
+        this.defaultVisit(reclaimed);
+    }
+
+    @Override
+    public void visit(SaveReclaimed saveReclaimed) {
+        this.defaultVisit(saveReclaimed);
+    }
+
+    @Override
+    public void visit(RemoteSave remoteSave) {
+        this.defaultVisit(remoteSave);
+    }
+
     private void defaultVisit(Message msg) {
         NetworkLogger.printLog(Level.WARNING, "Message type not supported");
     }

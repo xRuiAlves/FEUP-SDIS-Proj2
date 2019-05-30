@@ -30,4 +30,10 @@ public interface MessageVisitor {
     void visit(Retrieved retrieved);
 
     void visit(Delete delete);
+
+    void visit(Reclaimed reclaimed) throws IOException;
+
+    void visit(SaveReclaimed saveReclaimed);
+
+    void visit(RemoteSave remoteSave);
 }

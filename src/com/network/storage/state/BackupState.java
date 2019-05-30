@@ -19,7 +19,7 @@ public class BackupState {
 
     private ConcurrentHashMap<BigInteger, FileBackupInfo> backups = new ConcurrentHashMap<>();
 
-    private static final long MAX_DISK_SIZE_KBS = 1000000;
+    private long maxDiskSizeKbs = 1000000;
 
     private volatile long occupied_space_bytes = 0;
 
@@ -31,8 +31,12 @@ public class BackupState {
 
         this.updateOccupied(info.getSize());
         this.backups.put(info.getId(), info);
+        if (info instanceof RemoteBackupInfo) {
+            NetworkLogger.printLog(Level.INFO, String.format("Remotly backed up file with name %s and id %s", info.getName(), info.getId()));
 
-        NetworkLogger.printLog(Level.INFO, String.format("Backed up file with name %s and id %s", info.getName(), info.getId()));
+        } else {
+            NetworkLogger.printLog(Level.INFO, String.format("Backed up file with name %s and id %s", info.getName(), info.getId()));
+        }
         return true;
     }
 
@@ -48,11 +52,15 @@ public class BackupState {
     }
 
     public boolean canStore(long file_size) {
-        return occupied_space_bytes + file_size <= MAX_DISK_SIZE_KBS;
+        return occupied_space_bytes + file_size <= maxDiskSizeKbs;
     }
 
     private synchronized void updateOccupied(long diff) {
         occupied_space_bytes += diff;
+    }
+
+    public ConcurrentHashMap<BigInteger, FileBackupInfo> getBackups() {
+        return backups;
     }
 
     public Enumeration<BigInteger> getIds() {
@@ -61,5 +69,13 @@ public class BackupState {
 
     public FileBackupInfo get(BigInteger id) {
         return this.backups.getOrDefault(id, null);
+    }
+
+    public void setMaxDiskSizeKbs(long maxDiskSizeKbs) {
+        this.maxDiskSizeKbs = maxDiskSizeKbs;
+    }
+
+    public boolean isOversized() {
+        return occupied_space_bytes > maxDiskSizeKbs * 1000;
     }
 }

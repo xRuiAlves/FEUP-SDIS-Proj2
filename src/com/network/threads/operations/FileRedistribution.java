@@ -3,10 +3,12 @@ package com.network.threads.operations;
 import com.network.ChordNode;
 import com.network.info.NodeInfo;
 import com.network.log.NetworkLogger;
+import com.network.messages.chord.RemoteSave;
 import com.network.messages.protocol.Backup;
 import com.network.storage.io.AsyncFileHandler;
 import com.network.storage.state.BackupState;
 import com.network.storage.state.FileBackupInfo;
+import com.network.storage.state.RemoteBackupInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,38 +48,55 @@ public class FileRedistribution implements Runnable {
                 final NodeInfo predecessor = (NodeInfo) this.node.getPredecessor();
                 final FileBackupInfo info = BackupState.getInstance().get(id);
 
-                if (info == null)
+                if (info == null || !info.isRedistributable())
                     continue;
 
-                try {
-                    final String filename = folder_name + "/" + id;
-                    AsyncFileHandler.readFile(filename, (success, bytes_read, data) -> {
-                        try {
-                            if (!success) {
-                                return;
-                            }
-                            byte[] file_data = new byte[data.remaining()];
-                            data.get(file_data, 0, file_data.length);
-                            predecessor.getListener().getInternal().sendMessage(new Backup(file_data, info.getId(), info.getName()));
-
-                            BackupState.getInstance().unregisterBackup(id);
-                            File unnecessaryFile = new File(filename);
-                            if (!unnecessaryFile.delete()){
-                                NetworkLogger.printLog(Level.WARNING, "Failed to delete file - " + filename);
-                            }
-
-                            NetworkLogger.printLog(Level.INFO, "Redistribution of " + id + " successful");
-
-                        } catch (IOException e) {
-                            NetworkLogger.printLog(Level.WARNING, "Error redistributing files - " + e.getMessage());
-                        }
-                    });
-                } catch (IOException e) {
-                    NetworkLogger.printLog(Level.WARNING, "Error reading file in redistribution " + e.getMessage());
+                if (info instanceof RemoteBackupInfo) {
+                    redistributeRemoteBackup(predecessor, info);
+                } else {
+                    redistributeLocalBackup(folder_name, id, predecessor, info);
                 }
             }
 
             iter.remove();
+        }
+    }
+
+    private void redistributeRemoteBackup(NodeInfo predecessor, FileBackupInfo info) {
+        try {
+            final RemoteBackupInfo remoteBackupInfo = (RemoteBackupInfo) info;
+            predecessor.getListener().getInternal().sendMessage(new RemoteSave(info.getName(), info.getId(), remoteBackupInfo.getHostname(), remoteBackupInfo.getPort()));
+        } catch (IOException e) {
+            NetworkLogger.printLog(Level.WARNING, "Error redistributing files - " + e.getMessage());
+        }
+    }
+
+    private void redistributeLocalBackup(String folder_name, BigInteger id, NodeInfo predecessor, FileBackupInfo info) {
+        try {
+            final String filename = folder_name + "/" + id;
+            AsyncFileHandler.readFile(filename, (success, bytes_read, data) -> {
+                try {
+                    if (!success) {
+                        return;
+                    }
+                    byte[] file_data = new byte[data.remaining()];
+                    data.get(file_data, 0, file_data.length);
+                    predecessor.getListener().getInternal().sendMessage(new Backup(file_data, info.getId(), info.getName()));
+
+                    BackupState.getInstance().unregisterBackup(id);
+                    File unnecessaryFile = new File(filename);
+                    if (!unnecessaryFile.delete()) {
+                        NetworkLogger.printLog(Level.WARNING, "Failed to delete file - " + filename);
+                    }
+
+                    NetworkLogger.printLog(Level.INFO, "Redistribution of " + id + " successful");
+
+                } catch (IOException e) {
+                    NetworkLogger.printLog(Level.WARNING, "Error redistributing files - " + e.getMessage());
+                }
+            });
+        } catch (IOException e) {
+            NetworkLogger.printLog(Level.WARNING, "Error reading file in redistribution " + e.getMessage());
         }
     }
 
