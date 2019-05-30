@@ -71,7 +71,7 @@ public class ChordNode {
         ThreadPool.getInstance().submit(this.server);
         this.id = IdEncoder.encode(server.getServerConnection().getIp(), server.getServerConnection().getPort());
         this.predecessor = new NullInfo();
-        ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 1000, TimeUnit.MILLISECONDS);
+        ThreadPool.getInstance().scheduleAtFixedRate(new StabilizeOperation(this), 0, 500, TimeUnit.MILLISECONDS);
         ThreadPool.getInstance().scheduleAtFixedRate(new CheckPredecessor(this), 0, 500, TimeUnit.MILLISECONDS);
         fileRedistribution = new FileRedistribution(this);
         ThreadPool.getInstance().scheduleAtFixedRate(fileRedistribution, 0, 1000, TimeUnit.MILLISECONDS);
@@ -106,7 +106,7 @@ public class ChordNode {
             this.fingerTable.put(fingerId, new NullInfo());
             ConnectionHandler.getInstance().subscribeLookUp(fingerId, fingerTableUpdate);
         }
-        ThreadPool.getInstance().scheduleAtFixedRate(new UpdateFingers(this), 0, 500, TimeUnit.MILLISECONDS);
+        ThreadPool.getInstance().scheduleAtFixedRate(new UpdateFingers(this), 0, 1000, TimeUnit.MILLISECONDS);
 
     }
 

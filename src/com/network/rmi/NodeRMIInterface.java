@@ -8,4 +8,6 @@ import java.rmi.RemoteException;
 
 public interface NodeRMIInterface extends Remote {
     BasicInfo lookup(BigInteger lookup_id) throws RemoteException, InterruptedException;
+
+    void reclaim(long size) throws  RemoteException;
 }

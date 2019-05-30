@@ -2,6 +2,8 @@ package com.network.connections.listeners;
 
 import com.network.ChordNode;
 import com.network.connections.ConnectionHandler;
+import com.network.connections.client.ConnectionInterface;
+import com.network.connections.client.JSSETCPConnection;
 import com.network.info.BasicInfo;
 import com.network.info.NodeInfo;
 import com.network.log.NetworkLogger;
@@ -10,6 +12,7 @@ import com.network.messages.protocol.*;
 import com.network.storage.io.AsyncFileHandler;
 import com.network.storage.state.BackupState;
 import com.network.storage.state.FileBackupInfo;
+import com.network.storage.state.RemoteBackupInfo;
 import com.network.threads.ThreadPool;
 import com.network.threads.operations.SendMessage;
 
@@ -82,6 +85,7 @@ public class ListenerVisitor extends DefaultListener {
 
         if (!BackupState.getInstance().registerBackup(new FileBackupInfo(backup.getName(), backup.getFileData().length, backup.getId()))) {
             l.ci.sendMessage(new No());
+            return;
         }
 
         try {
@@ -117,6 +121,7 @@ public class ListenerVisitor extends DefaultListener {
 
         if (!BackupState.getInstance().isBackedUp(retrieveIfExists.getId())) {
             l.ci.sendMessage(new No());
+            return;
         }
 
         try {
@@ -132,7 +137,7 @@ public class ListenerVisitor extends DefaultListener {
 
                     l.ci.sendMessage(new Retrieved(file_data));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    NetworkLogger.printLog(Level.WARNING, "Error retrieving requested file - " + e.getMessage());
                 }
             });
         } catch (IOException e) {
@@ -154,5 +159,58 @@ public class ListenerVisitor extends DefaultListener {
         } else {
             NetworkLogger.printLog(Level.INFO, String.format("Received Delete for File with id %s that is not backed up", delete.getId()));
         }
+    }
+
+    @Override
+    public void visit(Reclaimed reclaimed) throws IOException {
+
+        if (l.node.getId().equals(reclaimed.getSenderId())) {
+            NetworkLogger.printLog(Level.SEVERE, "Failed to save reclaimed file - " + reclaimed.getId());
+            return;
+        }
+
+        String folder_name = l.node.getBaseFolderName();
+        File folder = new File(folder_name);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        if (!BackupState.getInstance().registerBackup(new FileBackupInfo(reclaimed.getName(), reclaimed.getFileData().length, reclaimed.getId(), false))) {
+            l.node.getSuccessor().getListener().getInternal().sendMessage(reclaimed);
+            return;
+        }
+
+        try {
+            AsyncFileHandler.writeToFile(folder_name + "/" + reclaimed.getId(), ByteBuffer.wrap(reclaimed.getFileData()), (boolean success, int bytes_written) -> {
+                try {
+                    if (success) {
+                        ConnectionInterface connection = new JSSETCPConnection(reclaimed.getHostname(), reclaimed.getPort());
+                        connection.sendMessage(new SaveReclaimed(l.node, reclaimed.getName(), reclaimed.getId()));
+                    } else {
+                        BackupState.getInstance().unregisterBackup(reclaimed.getId());
+                        l.node.getSuccessor().getListener().getInternal().sendMessage(reclaimed);
+                        NetworkLogger.printLog(Level.WARNING, "File writing was not successful.");
+                    }
+
+                } catch (Exception e) {
+                    NetworkLogger.printLog(Level.WARNING, "Error sending reply - " + e.getMessage());
+                }
+
+            });
+        } catch (IOException e) {
+            BackupState.getInstance().unregisterBackup(reclaimed.getId());
+            l.node.getSuccessor().getListener().getInternal().sendMessage(reclaimed);
+        }
+    }
+
+
+    @Override
+    public void visit(SaveReclaimed saveReclaimed) {
+        BackupState.getInstance().registerBackup(new RemoteBackupInfo(saveReclaimed.getName(), saveReclaimed.getId(), saveReclaimed.getHostname(), saveReclaimed.getPort()));
+    }
+
+    @Override
+    public void visit(RemoteSave remoteSave) {
+        BackupState.getInstance().registerBackup(new RemoteBackupInfo(remoteSave.getName(), remoteSave.getId(), remoteSave.getHostname(), remoteSave.getPort()));
     }
 }

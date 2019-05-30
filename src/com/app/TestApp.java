@@ -44,6 +44,10 @@ public class TestApp {
                     DeleteProtocol.start(rmiInterface, filename);
                     break;
 
+                case "RECLAIM":
+                    long size = Long.valueOf(args[2]);
+                    rmiInterface.reclaim(size);
+                    break;
                 default:
                     System.err.println("Unsupported operation: " + operation);
                     System.err.println("Supported operations: BACKUP, RESTORE, DELETE");
