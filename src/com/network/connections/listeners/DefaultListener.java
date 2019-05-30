@@ -85,6 +85,11 @@ public abstract class DefaultListener implements MessageVisitor {
         this.defaultVisit(remoteSave);
     }
 
+    @Override
+    public void visit(Redirect redirect) {
+        this.defaultVisit(redirect);
+    }
+
     private void defaultVisit(Message msg) {
         NetworkLogger.printLog(Level.WARNING, "Message type not supported");
     }
