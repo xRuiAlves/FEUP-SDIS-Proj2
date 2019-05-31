@@ -19,7 +19,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 1) {
-            System.err.println("Usage: java Main <start_op> [ <ip> <port> ]");
+            System.err.println("Usage: <start_op> [ <ip> <port> ]");
             System.err.println("Valid start operations: Create and Join");
             System.exit(-1);
         }
