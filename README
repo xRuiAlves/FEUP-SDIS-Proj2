@@ -1,0 +1,29 @@
+To build and run the project, a set of shell scripts were developed.
+
+
+To build the project:
+./compile.sh
+
+
+To delete all the folders used for peer storage:
+./delete_node_storage.sh
+
+
+To start a peer:
+./start_peer.sh <start_op> [<ip> <port>]
+start_op -> create (for the first peer to create the network) or join (to join existing network)
+ip       -> only necessary if start_op = join
+port     -> only necessary if start_op = join
+
+
+To start the test app (to run protocols from a requested peer):
+./start_app.sh <peer-id> <operation> <filename>
+peer-id   -> bound RMI name of the desired peer
+operation -> BACKUP, RESTORE, DELETE or RECLAIM
+filename  -> file of the name to backup, restore or delete. In the case of the RECLAIM protocol, this parameter specifies the peer's new storage space.
+
+
+
+Notes:
+In order to run the project, a Java version of 8 or higher is necessary.
+In order to build the project, the jdk bundled version of javac can be used.
