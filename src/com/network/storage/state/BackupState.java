@@ -52,7 +52,7 @@ public class BackupState {
     }
 
     public boolean canStore(long file_size) {
-        return occupied_space_bytes + file_size <= maxDiskSizeKbs;
+        return occupied_space_bytes + file_size <= maxDiskSizeKbs * 1000;
     }
 
     private synchronized void updateOccupied(long diff) {
