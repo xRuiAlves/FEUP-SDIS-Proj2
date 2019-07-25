@@ -5,7 +5,7 @@ Projects developed for the SDIS (Distributed Sistems) course unit.
 * **Date:** 3rd Year, 2nd Semester, 2018/2019
 * **Topic:** Lab classes exercises and Projects
 * **Course:** Sistemas Distribuidos (SDIS) | Distributed Systems
-* **Course Link:** https://sigarra.up.pt/feup/pt/UCURR_GERAL.FICHA_UC_VIEW?pv_ocorrencia_id=420006
+* **Course Link:** https://sigarra.up.pt/feup/pt/UCURR_GERAL.FICHA_UC_VIEW?pv_ocorrencia_id=420009
 * **In Collaboration With:** Miguel Duarte ([@miguelpduarte](https://github.com/miguelpduarte)), Guilherme Silva ([@GuilhermeJSilva](https://github.com/GuilhermeJSilva)) and Filipa Durão ([@FilipaDurao](https://github.com/FilipaDurao))
 
 ### Disclaimer
